@@ -54,7 +54,7 @@ The CSV file needs to be in the same folder as the POD5 files. If you have two l
 #SBATCH --error basecallerr_%j.err     # save the error output into a file
 
 module purge
-module load Dorado/0.5.0
+module load Dorado/0.9.1
 
 ##############DORADO#####################
 dorado basecaller sup /nesi/nobackup/uow03920/BlowflyAssemblyData/Promethion_Raw_Data_Blow5/Barcodes_needed_22258/  --recursive --device 'cuda:all' --kit-name SQK-MLK111-96-XL --sample-sheet Barcodes_needed_22258/22258.csv --resume-from /nesi/nobackup/uow03920/BlowflyAssembly/BAM_basecall/22258_sup_calls.bam > /nesi/nobackup/uow03920/BlowflyAssembly/BAM_basecall/22258_sup_calls_rsumd.bam
