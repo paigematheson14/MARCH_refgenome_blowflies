@@ -34,4 +34,8 @@ I used DORADO (https://github.com/nanoporetech/dorado). You first need to create
 | SQK-NBD114-96  | R0410         | PAY78695     | barcode64 | 4_hilli              |
 
 
+NOTE: you will need the kit name and experiment ID to match what is in your data. If you didn't recieve this information from your sequencer, it is possible to retrieve this information from the POD5 files using the POD5 tool (https://github.com/nanoporetech/pod5-file-format).
+
+The CSV file needs to be in the same folder as the POD5 files. If you have two libraries to basecall, then you need to have two folders and run each library seperately. Here is the slurm script for basecalling (BTW you only need the '#SBATCH --gpus-per-node=A100:1' line for the basecalling part, so can remove from subsequent slurms)
+
 
