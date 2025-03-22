@@ -163,9 +163,9 @@ cd /nesi/nobackup/uow03920/05_blowfly_assembly_march/04_demux/0410/0410
 #fastq#
 
 samtools fastq 06b13970143c3e9538f5935f0d28273385d449bc_1_quadrimaculata.bam > /nesi/nobackup/uow03920/05_blowfly_assembly_march/05_fastq/0410_quadrimaculata.fastq
-samtools fastq 06b13970143c3e9538f5935f0d28273385d449bc_2_vicina.bam > /nesi/nobackup/uow03920/05_blowfly_assembly_march/05_fastq/0408_vicina.fastq
-samtools fastq 06b13970143c3e9538f5935f0d28273385d449bc_3_stygia.bam > /nesi/nobackup/uow03920/05_blowfly_assembly_march/05_fastq/0408_stygia.fastq
-samtools fastq 06b13970143c3e9538f5935f0d28273385d449bc_4_hilli.bam > /nesi/nobackup/uow03920/05_blowfly_assembly_march/05_fastq/0408_hilli.fastq
+samtools fastq 06b13970143c3e9538f5935f0d28273385d449bc_2_vicina.bam > /nesi/nobackup/uow03920/05_blowfly_assembly_march/05_fastq/0410_vicina.fastq
+samtools fastq 06b13970143c3e9538f5935f0d28273385d449bc_3_stygia.bam > /nesi/nobackup/uow03920/05_blowfly_assembly_march/05_fastq/0410_stygia.fastq
+samtools fastq 06b13970143c3e9538f5935f0d28273385d449bc_4_hilli.bam > /nesi/nobackup/uow03920/05_blowfly_assembly_march/05_fastq/0410_hilli.fastq
 ```
 
 
