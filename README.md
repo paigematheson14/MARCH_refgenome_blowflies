@@ -63,6 +63,27 @@ dorado basecaller sup /nesi/nobackup/uow03920/BLOWFLY_ASSEMBLY_DATA/02_basecalli
 # step 2: demultiplexing using DEMUX
 I used the DORADO demux tool (https://github.com/nanoporetech/dorado), running all three libraries seperately. I tried to run this a couple of times using a slurm script but it failed twice so I just ran it directly on Nesi and it worked fine - took about two hours per library. The output is four BAM files (i.e. one BAM file per sample).
 
+```
+#!/bin/bash -e
+
+#SBATCH --account=uow03920
+#SBATCH --job-name=demux 
+#SBATCH --mem=30G
+#SBATCH --cpus-per-task=8
+#SBATCH --ntasks-per-node=8
+#SBATCH --time=5:00:00
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output demux_0406__%j.out    # save the output into a file
+#SBATCH --error demux_0406__%j.err     # save the error output into a file
+
+module purge
+module load Dorado/0.9.1
+
+cd /nesi/nobackup/uow03920/05_blowfly_assembly_march/03_BAM       
+
+#demux#
+dorado demux --output-dir nesi/nobackup/uow03920/05_blowfly_assembly_march/04_demux/0406 --no-classify 0406_sup_calls_rsumd.bam
 
 
 
