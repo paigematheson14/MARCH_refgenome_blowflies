@@ -84,6 +84,100 @@ cd /nesi/nobackup/uow03920/05_blowfly_assembly_march/03_BAM
 
 #demux#
 dorado demux --output-dir nesi/nobackup/uow03920/05_blowfly_assembly_march/04_demux/0406 --no-classify 0406_sup_calls_rsumd.bam
+```
+
+# step 3: convert bam files to FASTQ files
+
+We used SAMtools because it is the best for insect genomes. Other tools are highly optimised for humans etc. SAMtools is also the fastest.
+
+```
+#!/bin/bash -e
+
+#SBATCH --account=uow03920
+#SBATCH --job-name=fastq_0406
+#SBATCH --mem=15G
+#SBATCH --cpus-per-task=8
+#SBATCH --ntasks-per-node=8
+#SBATCH --time=1:00:00
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output fastq_0406__%j.out    # save the output into a file
+#SBATCH --error fastq_0406__%j.err     # save the error output into a file
+
+module purge
+module load SAMtools
+
+cd /nesi/nobackup/uow03920/05_blowfly_assembly_march/04_demux/0406/0406
+
+#fast q#
+
+samtools fastq d58d8b92237ca34d5af928b49daee629f810f013_3_stygia.bam > /nesi/nobackup/uow03920/05_blowfly_assembly_march/05_fastq/0406_stygia.fastq
+samtools fastq d58d8b92237ca34d5af928b49daee629f810f013_4_hilli.bam > /nesi/nobackup/uow03920/05_blowfly_assembly_march/05_fastq/0406_hilli.fastq
+```
+
+```
+#!/bin/bash -e
+
+#SBATCH --account=uow03920
+#SBATCH --job-name=fastq_0408
+#SBATCH --mem=15G
+#SBATCH --cpus-per-task=8
+#SBATCH --ntasks-per-node=8
+#SBATCH --time=1:00:00
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output fastq_0408__%j.out    # save the output into a file
+#SBATCH --error fastq_0408__%j.err     # save the error output into a file
+
+module purge
+module load SAMtools
+
+cd /nesi/nobackup/uow03920/05_blowfly_assembly_march/04_demux/0408/0408
+
+#fastq#
+
+samtools fastq 48305005d92ac294badde036140df6e8ce951184_1_quadrimaculata.bam > /nesi/nobackup/uow03920/05_blowfly_assembly_march/05_fastq/0408_quadrimaculata.fastq
+samtools fastq 48305005d92ac294badde036140df6e8ce951184_2_vicina.bam > /nesi/nobackup/uow03920/05_blowfly_assembly_march/05_fastq/0408_vicina.fastq
+samtools fastq 48305005d92ac294badde036140df6e8ce951184_3_stygia.bam > /nesi/nobackup/uow03920/05_blowfly_assembly_march/05_fastq/0408_stygia.fastq
+samtools fastq 48305005d92ac294badde036140df6e8ce951184_4_hilli.bam > /nesi/nobackup/uow03920/05_blowfly_assembly_march/05_fastq/0408_hilli.fastq
+```
+```
+#!/bin/bash -e
+
+#SBATCH --account=uow03920
+#SBATCH --job-name=fastq_0410
+#SBATCH --mem=15G
+#SBATCH --cpus-per-task=8
+#SBATCH --ntasks-per-node=8
+#SBATCH --time=1:00:00
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output fastq_0410__%j.out    # save the output into a file
+#SBATCH --error fastq_0410__%j.err     # save the error output into a file
+
+module purge
+module load SAMtools
+
+cd /nesi/nobackup/uow03920/05_blowfly_assembly_march/04_demux/0410/0410
+
+#fastq#
+
+samtools fastq 06b13970143c3e9538f5935f0d28273385d449bc_1_quadrimaculata.bam > /nesi/nobackup/uow03920/05_blowfly_assembly_march/05_fastq/0410_quadrimaculata.fastq
+samtools fastq 06b13970143c3e9538f5935f0d28273385d449bc_2_vicina.bam > /nesi/nobackup/uow03920/05_blowfly_assembly_march/05_fastq/0408_vicina.fastq
+samtools fastq 06b13970143c3e9538f5935f0d28273385d449bc_3_stygia.bam > /nesi/nobackup/uow03920/05_blowfly_assembly_march/05_fastq/0408_stygia.fastq
+samtools fastq 06b13970143c3e9538f5935f0d28273385d449bc_4_hilli.bam > /nesi/nobackup/uow03920/05_blowfly_assembly_march/05_fastq/0408_hilli.fastq
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 
