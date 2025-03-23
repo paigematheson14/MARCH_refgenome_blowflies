@@ -175,7 +175,85 @@ cat sample2.fastq  sample2a.fastq > MO_02_cat.fastq
 cat sample3.fastq  sample3a.fastq > MO_03_cat.fastq
 cat sample4.fastq  sample4a.fastq > MO_04_cat.fastq
 
+# step 5: QC prior to filtering using Nanoplot
 
+```
+#!/bin/bash -e
+
+#SBATCH --account=uow03920
+#SBATCH --job-name=nanoplot
+#SBATCH --mem=15G
+#SBATCH --cpus-per-task=8
+#SBATCH --ntasks-per-node=8
+#SBATCH --time=3:00:00
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output nanoplot_%j.out    # save the output into a file
+#SBATCH --error nanoplot_%j.err     # save the error output into a file
+
+module purge
+module load NanoPlot
+
+#####NANOPLOT#####
+
+for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina; do
+  NanoPlot --verbose -t 8 --fastq /nesi/nobackup/uow03920/05_blowfly_assembly_march/06_concatenate/${i}.fastq -o /nesi/nobackup/uow03920/05_blowfly_assembly_march/07_pre_assembly_QC/01_NanoPlot/${i}
+done
+```
+
+# step 6: filtering using CHOPPER
+we decided to filter reads that were less than 1000 bases long and with quality scores lower than 10
+
+```
+#!/bin/bash -e
+
+#SBATCH --account=uow03920
+#SBATCH --job-name=chopper
+#SBATCH --mem=40G
+#SBATCH --cpus-per-task=8
+#SBATCH --ntasks-per-node=8
+#SBATCH --time=12:00:00
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output chopper_%j.out    # save the output into a file
+#SBATCH --error chopper_%j.err     # save the error output into a file
+
+module purge
+module load chopper
+
+#####CHOPPER#####
+for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina; do
+chopper --threads 8 -q 10 -l 1000 < /nesi/nobackup/uow03920/05_blowfly_assembly_march/06_concatenate/${i}.fastq > /nesi/nobackup/uow03920/05_blowfly_assembly_march/08_filtered/${i}.fastq ;
+done
+```
+
+# step 7: post filtering QC using nanoplot
+samples improved a lot - hilli and stygia look great. vicina looks a little average. quadrimaculata still looks ehhhhhhhhhhh. 
+
+
+```
+#!/bin/bash -e
+
+#SBATCH --account=uow03920
+#SBATCH --job-name=nanoplot_post_filter
+#SBATCH --mem=15G
+#SBATCH --cpus-per-task=8
+#SBATCH --ntasks-per-node=8
+#SBATCH --time=3:00:00
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output nanoplot_postfilter__%j.out    # save the output into a file
+#SBATCH --error nanoplot_postfilter__%j.err     # save the error output into a file
+
+module purge
+module load NanoPlot
+
+#####NANOPLOT#####
+
+for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina; do
+  NanoPlot --verbose -t 8 --fastq /nesi/nobackup/uow03920/05_blowfly_assembly_march/08_filtered/${i}.fastq -o /nesi/nobackup/uow03920/05_blowfly_assembly_march/07_pre_assembly_QC/02_NanoPlot_post_filter/${i}
+done
+```
 
 
 
