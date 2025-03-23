@@ -168,6 +168,12 @@ samtools fastq 06b13970143c3e9538f5935f0d28273385d449bc_3_stygia.bam > /nesi/nob
 samtools fastq 06b13970143c3e9538f5935f0d28273385d449bc_4_hilli.bam > /nesi/nobackup/uow03920/05_blowfly_assembly_march/05_fastq/0410_hilli.fastq
 ```
 
+# step 4: merge the libraries together so that we are only working off one file
+
+cat sample1.fastq  sample1a.fastq > MO_01_cat.fastq
+cat sample2.fastq  sample2a.fastq > MO_02_cat.fastq
+cat sample3.fastq  sample3a.fastq > MO_03_cat.fastq
+cat sample4.fastq  sample4a.fastq > MO_04_cat.fastq
 
 
 
