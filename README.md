@@ -255,6 +255,157 @@ for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina; do
 done
 ```
 
+# step 8 : assemble genome ! yay
+
+used a nextflow script: 
+
+```
+#!/usr/bin/env nextflow
+
+// Define the list of IDs
+params.ids = [ '01_hilli', '02_quadrimaculata', '03_stygia', '04_vicina']
+
+// Create a channel from the list of IDs
+Channel.from(params.ids)
+    .set { id_ch }
+
+// Define the process for running flye
+process runFlye {
+    cpus 24
+    memory '60 GB'
+    publishDir("/nesi/nobackup/uow03920/05_blowfly_assembly_march/09_assembly", mode: 'move')
+    // Define the input
+    input:
+    val id from id_ch
+
+    // Define the output
+    output:
+    file("${id}_flye") into flye_out_ch
+
+    // Define the command to be executed
+    script:
+    """
+    flye --nano-hq /nesi/nobackup/uow03920/05_blowfly_assembly_march/08_filtered/${id}.fastq \
+         --out-dir ${id}_flye --threads ${task.cpus} -g 700m
+    """
+}
+
+// Define what to do with the output (optional)
+flye_out_ch.view()
+```
+
+and ran it using a slurm script: 
+
+```
+#!/bin/bash -e
+#SBATCH --account=uow03920
+#SBATCH --job-name=nextflow_Flye
+#SBATCH --time=48:00:00
+#SBATCH --cpus-per-task=48
+#SBATCH --mem=180G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output nextflow_flye_%j.out    # save the output into a file
+#SBATCH --error nextflow_flye%j.err     # save the error output into a file
+
+# purge all other modules that may be loaded, and might interfare
+module purge
+
+## load tools
+module load Flye/2.9.3-gimkl-2022a-Python-3.11.3 
+ml Nextflow/22.10.7
+### FLYE
+
+nextflow run flye.nf
+```
+
+
+# step 11: quast 
+
+```
+pip install quast
+```
+
+```
+quast.py -t 16 -o /nesi/nobackup/uow03920/05_blowfly_assembly_march/10_post_assembly_QC -l '01_hilli 02_quadrimaculata 03_stygia 04_vicina'  /nesi/nobackup/uow03920/05_blowfly_assembly_march/09_assembly/01_hilli/01_hilli.fasta /nesi/nobackup/uow03920/05_blowfly_assembly_march/09_assembly/02_quadrimaculata/02_quadrimaculata.fasta /nesi/nobackup/uow03920/05_blowfly_assembly_march/09_assembly/03_stygia/03_stygia.fasta /nesi/nobackup/uow03920/05_blowfly_assembly_march/09_assembly/04_vicina/04_vicina.fasta
+```
+
+# step 12: busco 
+
+```#!/bin/bash -e
+#SBATCH --account=uow03920
+#SBATCH --job-name=compleasm
+#SBATCH --time=3:00:00
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=15G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output compleasm_%j.out    # save the output into a file
+#SBATCH --error compleasm_%j.err     # save the error output into a file
+
+# purge all other modules that may be loaded, and might interfare
+module purge
+
+## load tools
+module load compleasm/0.2.5-gimkl-2022a
+
+### Compleasm
+for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina;
+do
+compleasm.py run -a /nesi/nobackup/uow03920/05_blowfly_assembly_march/09_assembly/${i}_flye/${i}.fasta -o /nesi/nobackup/uow03920/05_blowfly_assembly_march/10_post_assembly_QC/02_busco/${i}/${i}_compleasm -l diptera_odb10 -t 8 ;
+done
+```
+
+# step 13: purge haplotigs 
+busco revealed that there were quite a few duplicated genes, so we will purge haplotigs to try and remove them
+
+1. First align the fastq files to the fasta sequences to generate .paf files. Make a folder for each sample and do the code in those folders. I was doing it all in one big conglomerate folder and it kept overlapping and creating problems lol. I would recommend completing all of the steps for each sample one at a time rather than doing each step for each sample at the same time (i.e., do all the steps for sample one and then all the steps for sample 2).
+
+```
+#!/bin/bash -e
+
+#SBATCH --account=uow03920
+#SBATCH --job-name=minimap
+#SBATCH --mem=15G
+#SBATCH --cpus-per-task=8
+#SBATCH --ntasks-per-node=8
+#SBATCH --time=3:00:00
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output minimapout_%j.out    # save the output into a file
+#SBATCH --error minimap_%j.err     # save the error output into a file
+
+module purge
+module load minimap2
+
+#####MINIMAP#####
+for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina; do
+minimap2 -c /nesi/nobackup/uow03920/05_blowfly_assembly_march/09_assembly_${i}_flye/${i}.fasta /nesi/nobackup/uow03920/05_blowfly_assembly_march/08_filtered/${i}.fastq > /nesi/nobackup/uow03920/05_blowfly_assembly_march/11_purge_haplotigs/${i}/${i}_alignment.paf
+done
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
