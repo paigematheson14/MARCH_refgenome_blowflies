@@ -359,7 +359,7 @@ done
 # step 13: purge haplotigs 
 busco revealed that there were quite a few duplicated genes, so we will purge haplotigs to try and remove them
 
-1. First align the fastq files to the fasta sequences to generate .paf files. Make a folder for each sample and do the code in those folders. I was doing it all in one big conglomerate folder and it kept overlapping and creating problems lol. I would recommend completing all of the steps for each sample one at a time rather than doing each step for each sample at the same time (i.e., do all the steps for sample one and then all the steps for sample 2).
+1. First align the fastq files to the fasta sequences to generate .paf files. Make a folder for each sample and do the code in those folders. I was doing it all in one big conglomerate folder and it kept overlapping and creating problems lol. I would recommend completing all of the steps for each sample one at a time rather than doing each step for each sample at the same time (i.e., do all the steps for sample one and then all the steps for sample 2). Needed like 72 hours to run!!!! Ended up timing out quite a few times
 
 ```
 #!/bin/bash -e
@@ -369,7 +369,7 @@ busco revealed that there were quite a few duplicated genes, so we will purge ha
 #SBATCH --mem=15G
 #SBATCH --cpus-per-task=8
 #SBATCH --ntasks-per-node=8
-#SBATCH --time=3:00:00
+#SBATCH --time=72:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=paige.matheson14@gmail.com
 #SBATCH --output minimapout_%j.out    # save the output into a file
