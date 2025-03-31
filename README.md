@@ -450,7 +450,10 @@ done
 ```
 
 ```
-quast.py -t 16 -o /nesi/nobackup/uow03920/05_blowfly_assembly_march/12_post_purge_QC -l '01_hilli 02_quadrimaculata 03_stygia 04_vicina'  /nesi/nobackup/uow03920/05_blowfly_assembly_march/11_purge_haplotigs/01_hilli/01_hilli_purged.fasta /nesi/nobackup/uow03920/05_blowfly_assembly_march/11_purge_haplotigs/02_quadrimaculata/02_quadrimaculata_purged.fasta /nesi/nobackup/uow03920/05_blowfly_assembly_march/11_purge_haplotigs/03_stygia/03_stygia_purged.fasta /nesi/nobackup/uow03920/05_blowfly_assembly_march/11_purge_haplotigs/04_vicina/04_vicina_purged.fasta
+quast.py -t 16 -o /nesi/nobackup/uow03920/05_blowfly_assembly_march/12_post_purge_QC -l '01_hilli 02_quadrimaculata 03_stygia 04_vicina'  /nesi/nobackup/uow03920/05_blowfly_assembly_march/11_purge_haplotigs/01_hilli/01_hilli_purged.fa
+/nesi/nobackup/uow03920/05_blowfly_assembly_march/11_purge_haplotigs/02_quadrimaculata/02_quadrimaculata_purged.fa
+/nesi/nobackup/uow03920/05_blowfly_assembly_march/11_purge_haplotigs/03_stygia/03_stygia_purged.fa
+/nesi/nobackup/uow03920/05_blowfly_assembly_march/11_purge_haplotigs/04_vicina/04_vicina_purged.fa
 ```
 
 
