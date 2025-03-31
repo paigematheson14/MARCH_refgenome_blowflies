@@ -414,13 +414,13 @@ minimap2 -xasm5 -DP con_split_01_hilli.fa con_split_01_hilli.fa | gzip -c - > co
 purge duplicates 
 
 ```
-purge_dups -2 -T cutoffs -c PB.base.cov con_split_MO_01.self.paf.gz > dups_MO_01.bed 2> purge_dups_MO_01.log
+purge_dups -2 -T cutoffs -c PB.base.cov con_split_01_hilli.self.paf.gz > dups_01_hilli.bed 2> purge_dups_01_hilli.log
 ```
 
 extract sequences!!!
 
 ```
-purge_dups -2 -T cutoffs -c PB.base.cov con_split_01_hilli.self.paf.gz > dups_01_hilli.bed 2> purge_dups_01_hilli.log
+get_seqs -e dups_01_hilli.bed 01_hilli.fasta
 ```
 
 
