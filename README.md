@@ -384,6 +384,44 @@ minimap2 -c /nesi/nobackup/uow03920/05_blowfly_assembly_march/09_assembly_${i}_f
 done
 ```
 
+next, generate statistics for each .paf file. does not need to be done through a slurm script 
+
+```
+ml purge_dups
+```
+```
+pbcstat 01_hilli_alignment.paf
+```
+
+calculate the cutoffs
+
+```
+calcuts PB.stat > cutoffs 2> calcuts_01_hilli.log
+```
+
+split the consensus fasta file 
+
+```
+split_fa /nesi/nobackup/uow03920/05_blowfly_assembly_march/09_assembly/01_hilli_flye/01_hilli.fasta > con_split_01_hilli.fa
+```
+
+generate a self ampping .paf file 
+
+```
+minimap2 -xasm5 -DP con_split_01_hilli.fa con_split_01_hilli.fa | gzip -c - > con_split_01_hilli_.self.paf.gz
+```
+
+purge duplicates 
+
+```
+purge_dups -2 -T cutoffs -c PB.base.cov con_split_MO_01.self.paf.gz > dups_MO_01.bed 2> purge_dups_MO_01.log
+```
+
+extract sequences!!!
+
+```
+purge_dups -2 -T cutoffs -c PB.base.cov con_split_01_hilli.self.paf.gz > dups_01_hilli.bed 2> purge_dups_01_hilli.log
+```
 
 
 
