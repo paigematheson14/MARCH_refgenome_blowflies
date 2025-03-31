@@ -423,7 +423,31 @@ extract sequences!!!
 get_seqs -e dups_01_hilli.bed 01_hilli.fasta
 ```
 
+# step ? BUSCO again and quast 
 
+```
+#SBATCH --account=uow03920
+#SBATCH --job-name=compleasm_purged
+#SBATCH --time=3:00:00
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=15G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output compleasm_%j.out    # save the output into a file
+#SBATCH --error compleasm_%j.err     # save the error output into a file
+
+# purge all other modules that may be loaded, and might interfare
+module purge
+
+## load tools
+module load compleasm/0.2.5-gimkl-2022a
+
+### Compleasm
+for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina;
+do
+compleasm.py run -a /nesi/nobackup/uow03920/05_blowfly_assembly_march/11_purge_haplotigs/${i}/${i}_purged.fa -o /nesi/nobackup/uow03920/05_blowfly_assembly_march/12_post_purge_QC/02_busco/${i}/${i}_compleasm -l diptera_odb10 -t 8 ;
+done
+```
 
 
 
