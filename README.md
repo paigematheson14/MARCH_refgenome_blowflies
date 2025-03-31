@@ -408,7 +408,7 @@ split_fa /nesi/nobackup/uow03920/05_blowfly_assembly_march/09_assembly/01_hilli_
 generate a self ampping .paf file 
 
 ```
-minimap2 -xasm5 -DP con_split_01_hilli.fa con_split_01_hilli.fa | gzip -c - > con_split_01_hilli_.self.paf.gz
+minimap2 -xasm5 -DP con_split_01_hilli.fa con_split_01_hilli.fa | gzip -c - > con_split_01_hilli.self.paf.gz
 ```
 
 purge duplicates 
