@@ -457,6 +457,89 @@ quast.py -t 16 -o /nesi/nobackup/uow03920/05_blowfly_assembly_march/12_post_purg
 ```
 
 
+# then meeran did the medaka polishing 
+
+# use meryl and merqury to check some other stuff:
+need to download meryl AND merqury (https://github.com/marbl/merqury?tab=readme-ov-file#direct-installation <-- see this page for steps on how to install). Importantly - run this line of code to get it to work lol ```export MERQURY=$PWD``` (i.e., set the environment variable as $merqury). idk man it doesn't work without it. 
+
+
+# first create meryl database: 
+
+```
+#!/bin/bash -e
+
+#SBATCH --account=uow03920
+#SBATCH --job-name=meryl
+#SBATCH --mem=15G
+#SBATCH --cpus-per-task=8
+#SBATCH --ntasks-per-node=8
+#SBATCH --time=2:00:00
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output meryl_%j.out    # save the output into a file
+#SBATCH --error meryl_%j.err     # save the error output into a file
+
+cd /nesi/nobackup/uow03920/05_blowfly_assembly_march/16_merqury
+
+module purge
+module load Merqury
+
+#meryl
+for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina; do
+
+meryl k=18 count /nesi/nobackup/uow03920/05_blowfly_assembly_march/16_merqury/${i}/consensus.fasta output /nesi/nobackup/uow03920/05_blowfly_assembly_march/16_merqury/${i}/${i}_.meryl;
+
+## Create Histogram
+meryl histogram ${i}_k18.meryl > ${i}_k18.hist;
+
+## Replace with space separator
+tr '\t' ' ' <${i}_k18.hist > ${i}_k18_s.hist;
+
+done
+```
+
+BTW - I created 4 different folders for each species to work within. If you try make it work all within one folder it probably won't work. 
+
+# merqury 
+
+```
+#!/bin/bash -e
+#SBATCH --account=uow03920
+#SBATCH --job-name=merqury
+#SBATCH --time=12:00:00
+#SBATCH --cpus-per-task=32
+#SBATCH --mem=25G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output merqury_%j.out    # save the output into a file
+#SBATCH --error merqury_%j.err     # save the error output into a file
+
+# purge all other modules that may be loaded, and might interfare
+module purge
+## load module 
+module load Merqury/1.3-Miniconda3
+module load R
+# Need argparse, ggplot2, scales
+Rscript -e 'install.packages(c("argparse", "ggplot2", "scales"),repos = "http://cran.us.r-project.org")'
+
+module load SAMtools/1.19-GCC-12.3.0
+module load BEDTools/2.30.0-GCC-11.3.0
+module load Java/20.0.2
+module load IGV/2.16.1
+
+cd /nesi/nobackup/uow03920/05_blowfly_assembly_march/16_merqury/merqury
+export MERQURY=$PWD
+
+for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina;
+do
+cd /nesi/nobackup/uow03920/05_blowfly_assembly_march/16_merqury/${i}
+
+#meryl count
+$MERQURY/merqury.sh ${i}_.meryl ${i}.fasta ${i}_merqury_output
+```
+
+
+
 
 
 
