@@ -538,6 +538,54 @@ cd /nesi/nobackup/uow03920/05_blowfly_assembly_march/16_merqury/${i}
 $MERQURY/merqury.sh ${i}_.meryl ${i}.fasta ${i}_merqury_output
 ```
 
+# Scaffolding
+Want to check synteny to see if i can use the high quality C. vicina reference genome to scaffold all my species
+
+If two genomes are syntenic, scaffolding will likely improve contiguity and be accurate.
+If they’re not syntenic (due to inversions, translocations, etc.), reference-guided scaffolding can:
+- Misplace contigs
+- Introduce false joins
+- Create chimeric scaffolds that do not exist in nature
+
+Synteny analysis (e.g., dot plots) shows:
+
+- Conserved regions (straight diagonals)
+- Inversions (flipped diagonals)
+- Duplications, deletions, or rearrangements (off-diagonal or fragmented patterns)
+
+This lets you:
+- Understand evolutionary divergence between species
+- Avoid blindly trusting scaffolding decisions in divergent regions
+
+Used mumMER
+
+```#!/bin/bash -e
+#SBATCH --account=uow03920
+#SBATCH --job-name=synteny_check
+#SBATCH --time=10:00:00
+#SBATCH --cpus-per-task=8
+#SBATCH --ntasks-per-node=2
+#SBATCH --mem=10G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output synteny_%j.out    # save the output into a file
+#SBATCH --error synteny_%j.err     # save the error output into a file
+
+# purge all other modules that may be loaded, and might interfere
+module purge
+ml MUMmer  
+
+########## Loop ##############
+for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina; do 
+nucmer --prefix=vicina_vs_${i} /nesi/nobackup/uow03920/05_blowfly_assembly_march/14_medaka_polished/04_vicina_flye_medaka/consensus.fasta /nesi/nobackup/uow03920/05_blowfly_assembly_march/14_medaka_polished/${i}_flye_medaka/consensus.fasta
+delta-filter -1 vicina_vs_${i}.delta > vicina_vs_${i}.filtered.delta
+mummerplot --fat --postscript --layout --prefix=vicina_vs_${i} vicina_vs_${i}.filtered.delta;
+done
+```
+
+
+
+
 
 
 
