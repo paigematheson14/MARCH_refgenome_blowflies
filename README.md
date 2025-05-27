@@ -538,6 +538,38 @@ cd /nesi/nobackup/uow03920/05_blowfly_assembly_march/16_merqury/${i}
 $MERQURY/merqury.sh ${i}_.meryl ${i}.fasta ${i}_merqury_output
 ```
 
+# KAT to check quality 
+```
+#!/bin/bash -e
+#SBATCH --account=uow03920
+#SBATCH --partition=milan
+#SBATCH --job-name=kat_analysis
+#SBATCH --time=12:00:00
+#SBATCH --cpus-per-task=8
+#SBATCH --ntasks-per-node=2
+#SBATCH --mem=50G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output kat_analysis_%j.out    # save the output into a file
+#SBATCH --error kat_analysis_%j.err     # save the error output into a file
+
+# purge all other modules that may be loaded, and might interfere
+module purge
+ml KAT/2.4.2-gimkl-2018b-Python-3.7.3
+
+########## Loop ##############
+for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina;
+do
+    cd /nesi/nobackup/uow03920/05_blowfly_assembly_march/16_KAT/${i}
+    #### Link files
+    #assembly
+    ln -s /nesi/nobackup/uow03920/05_blowfly_assembly_march/14_medaka_polished/${i}_flye_medaka/consensus.fasta
+    ####kat command
+    kat comp -t 16 -o ${i}_kat "/nesi/nobackup/uow03920/05_blowfly_assembly_march/06_concatenate/${i}.fastq" consensus.fasta
+    cd ../../../
+done
+```
+
 # Scaffolding
 Want to check synteny to see if i can use the high quality C. vicina reference genome to scaffold all my species
 
