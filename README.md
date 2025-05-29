@@ -615,7 +615,41 @@ mummerplot --fat --postscript --layout --prefix=vicina_vs_${i} vicina_vs_${i}.fi
 done
 ```
 
+# scaffold using ragtag
 
+```
+#!/bin/bash 
+#SBATCH --account=uow03920
+#SBATCH --job-name=scaffold
+#SBATCH --time=10:00:00
+#SBATCH --cpus-per-task=8
+#SBATCH --ntasks-per-node=2
+#SBATCH --mem=30G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output scaffold_%j.out    # save the output into a file
+#SBATCH --error scaffold_%j.err     # save the error output into a file
+
+# purge all other modules that may be loaded, and might interfere
+module purge
+
+# Load necessary modules
+ml Python/3.11.6-foss-2023a
+ml minimap2/2.28-GCC-12.3.0
+ml unimap/0.1-GCC-11.3.0
+pip install RagTag
+
+#ragtag of stygia which had better synteny with vicina hi c so more straightfoward
+ragtag.py scaffold /nesi/nobackup/uow03920/05_blowfly_assembly_march/17_vicina/vicina_hic.fna /nesi/nobackup/uow03920/05_blowfly_assembly_march/14_medaka_polished/03_stygia_flye_medaka/consensus.fasta -o ragtag_stygia
+
+#ragtag of hilli which is a bit more cautious due to less synteny
+ragtag.py scaffold --nucmer --nucmer-params="--maxmatch" --remove-small /nesi/nobackup/uow03920/05_blowfly_assembly_march/17_vicina/vicina_hic.fna /nesi/nobackup/uow03920/05_blowfly_assembly_march/14_medaka_polished/03_stygia_flye_medaka/consensus.fasta -o ragtag_hilli
+
+
+#evaluate results
+ragtag.py stats ragtag_stygia/ragtag.scaffold.fasta
+ragtag.py stats ragtag_hilli/ragtag.scaffold.fasta
+```
 
 
 
