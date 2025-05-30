@@ -643,13 +643,20 @@ pip install RagTag
 ragtag.py scaffold /nesi/nobackup/uow03920/05_blowfly_assembly_march/17_vicina/vicina_hic.fna /nesi/nobackup/uow03920/05_blowfly_assembly_march/14_medaka_polished/03_stygia_flye_medaka/consensus.fasta -o ragtag_stygia
 
 #ragtag of hilli which is a bit more cautious due to less synteny
-ragtag.py scaffold --nucmer --nucmer-params="--maxmatch" --remove-small /nesi/nobackup/uow03920/05_blowfly_assembly_march/17_vicina/vicina_hic.fna /nesi/nobackup/uow03920/05_blowfly_assembly_march/14_medaka_polished/03_stygia_flye_medaka/consensus.fasta -o ragtag_hilli
+ragtag.py scaffold --nucmer --nucmer-params="--maxmatch -c 100 -g 1000" --remove-small /nesi/nobackup/uow03920/05_blowfly_assembly_march/17_vicina/vicina_hic.fna /nesi/nobackup/uow03920/05_blowfly_assembly_march/14_medaka_polished/03_stygia_flye_medaka/consensus.fasta -o ragtag_hilli
 
 
 #evaluate results
 ragtag.py stats ragtag_stygia/ragtag.scaffold.fasta
 ragtag.py stats ragtag_hilli/ragtag.scaffold.fasta
 ```
+
+
+| Parameter   | What it does                                               | Why it's good                                    |
+| ----------- | ---------------------------------------------------------- | ------------------------------------------------ |
+| `-maxmatch` | Align all maximal exact matches (most sensitive mode)      | Captures all syntenic regions, even short ones   |
+| `-c 100`    | Minimum cluster length = 100 bp                            | Reduces noise from short spurious matches        |
+| `-g 1000`   | Max distance between two matches to be in the same cluster | Allows flexibility in aligning regions with gaps |
 
 
 
