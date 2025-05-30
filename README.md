@@ -643,7 +643,7 @@ pip install RagTag
 ragtag.py scaffold /nesi/nobackup/uow03920/05_blowfly_assembly_march/17_vicina/vicina_hic.fna /nesi/nobackup/uow03920/05_blowfly_assembly_march/14_medaka_polished/03_stygia_flye_medaka/consensus.fasta -o ragtag_stygia
 
 #ragtag of hilli which is a bit more cautious due to less synteny
-ragtag.py scaffold --nucmer --nucmer-params="--maxmatch -c 100 -g 1000" --remove-small /nesi/nobackup/uow03920/05_blowfly_assembly_march/17_vicina/vicina_hic.fna /nesi/nobackup/uow03920/05_blowfly_assembly_march/14_medaka_polished/03_stygia_flye_medaka/consensus.fasta -o ragtag_hilli
+ragtag.py scaffold --nucmer-params="--maxmatch -c 100 -g 1000" --remove-small /nesi/nobackup/uow03920/05_blowfly_assembly_march/17_vicina/vicina_hic.fna /nesi/nobackup/uow03920/05_blowfly_assembly_march/14_medaka_polished/03_stygia_flye_medaka/consensus.fasta -o ragtag_hilli
 
 
 #evaluate results
