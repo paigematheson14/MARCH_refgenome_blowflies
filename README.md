@@ -779,6 +779,51 @@ done
 
 # at this point it is probably a good idea to download all of the QC files generated to save for results :)
 
+# BlobToolKit for QC and Detecting Contamination in Assembly
+
+BlobToolKit is used here for quality control and to detect potential contamination in the genome assembly. Several files need to be generated for BlobToolKit to function effectively:
+
+Blast output (to identify taxonomic affiliations)
+Aligned Nanopore reads (BAM file with .csi index)
+Assembly (FASTA format)
+BUSCO report (CSV format)
+
+## BLAST the assembly against the NT database
+
+```
+#!/bin/bash -e
+#SBATCH --account=uow03744
+#SBATCH --job-name=blastn
+#SBATCH --time=120:00:00
+#SBATCH --cpus-per-task=46
+#SBATCH --mem=120G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=meeranhussain1996@gmail.com
+#SBATCH --output Blastn_%j.out
+#SBATCH --error Blastn_%j.err
+
+# Purge any pre-loaded modules
+module purge
+
+# Load BLAST modules
+module load BLASTDB/2024-07 BLAST/2.13.0-GCC-11.3.0
+
+# Run BLAST for each scaffolded genome
+for i in 06 07 08 13 16 19 40; do 
+    blastn \
+    -query ./Maethio_${i}/ragtag.scaffold.fasta \
+    -task megablast \
+    -db nt \
+    -outfmt '6 qseqid staxids bitscore std sscinames sskingdoms stitle' \
+    -culling_limit 10 \
+    -num_threads 42 \
+    -evalue 1e-3 \
+    -out ./Maethio_${i}/Maethio_${i}_megablast.out;
+done
+```
+
+
+
 
 
 
