@@ -661,10 +661,123 @@ ragtag.py stats ragtag_hilli/ragtag.scaffold.fasta
 
 
 
+# QC of all assemblies using QUAST, BUSCO, qualimap, and KAT
+
+# busco (do a loop for this if multiple assemblies) 
+```
+#!/bin/bash -e
+#SBATCH --account=uow03920
+#SBATCH --job-name=compleasm_purged
+#SBATCH --time=1:00:00
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=10G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output compleasm_%j.out    # save the output into a file
+#SBATCH --error compleasm_%j.err     # save the error output into a file
+
+# purge all other modules that may be loaded, and might interfare
+module purge
+
+## load tools
+module load compleasm/0.2.5-gimkl-2022a
+
+### Compleasm
+compleasm.py run -a /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/02_quadrimaculata/02_quadrimaculata_scaffold.fasta -o /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/00_busco/02_quadrimaculata_compleasm -l diptera_odb10 -t 8;
+```
+
+# quast 
+```
+#!/bin/bash -e
+
+#SBATCH --account=uow03920
+#SBATCH --job-name=compleasm_purged
+#SBATCH --time=00:10:00
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=10G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output compleasm_%j.out    # save the output into a file
+#SBATCH --error compleasm_%j.err     # save the error output into a file
+
+quast.py -t 16 -o /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/00_quast -l '01_hilli, 02_quadrimaculata, 03_stygia, 04_vicina' /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/01_hilli/01_hilli_scaffold.fasta /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/02_quadrimaculata/02_quadrimaculata_scaffold.fasta /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/03_stygia/03_stygia_scaffold.fasta /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/04_vicina/04_vicina_scaffold.fasta
+```
+
+# kat
+
+```
+#!/bin/bash -e
+#SBATCH --account=uow03920
+#SBATCH --job-name=kat_analysis
+#SBATCH --time=12:00:00
+#SBATCH --cpus-per-task=8
+#SBATCH --ntasks-per-node=2
+#SBATCH --mem=50G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output kat_analysis_%j.out    # save the output into a file
+#SBATCH --error kat_analysis_%j.err     # save the error output into a file
+
+# purge all other modules that may be loaded, and might interfere
+module purge
+ml KAT/2.4.2-gimkl-2018b-Python-3.7.3
+
+########## Loop ##############
+for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina;
+do
+    cd /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/00_kat
+    #### Link files
+    #assembly
+    ln -s /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/${i}/${i}_scaffold.fasta
+    ####kat command
+    kat comp -t 16 -o ${i}_kat "/nesi/nobackup/uow03920/05_blowfly_assembly_march/06_concatenate/${i}.fastq" ${i}_scaffold.fasta
+    cd ../../../
+done
+```
+
+# qualimap 
+
+```
+#!/bin/bash -e
+#SBATCH --account=uow03920
+#SBATCH --job-name=qualimap
+#SBATCH --time=01:00:00
+#SBATCH --mem=20G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output qualimap%j.out
+#SBATCH --error qualimap%j.err
+
+module purge
+module load BWA/0.7.18-GCC-12.3.0
+
+for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina;
+do
+    # Index the scaffolded genome for alignment
+    bwa index /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/${i}/${i}_scaffold.fasta;
+
+    # Align reads to the scaffolded genome and process BAM file
+    bwa mem -t 24 /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/${i}/${i}_scaffold.fasta \
+    samtools view --threads 16 -F 0x4 -b - | \
+    samtools fixmate -m --threads 16 - - | \
+    samtools sort -m 2g --threads 16 - | \
+    samtools markdup --threads 16 -r - /nesi/nobackup/uow03020/05_blowfly_assembly_march/19_scaffold/00_qualimap/${i};
+
+    # Index the BAM file
+    samtools index -@ 24 /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/00_qualimap/${i}/${i}_sort_sfld.bam -o /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/00_qualimap/${i}/${i}_sort_sfld.bam.bai;
+
+    # Perform Qualimap bamqc on the BAM file
+    /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/00_qualimap/qualimap_v2.3/qualimap bamqc \
+    -bam /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/00_qualimap/${i}/${i}_sort_sfld.bam \
+    -outdir /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/00_qualimap \
+    -nt 16 --java-mem-size=8G;
+
+    cd ../;
+done
+```
 
 
-
-
+# at this point it is probably a good idea to download all of the QC files generated to save for results :)
 
 
 
