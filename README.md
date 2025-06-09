@@ -824,9 +824,9 @@ done
 
 # blob to check for contamination
 
-Have to first trim the last two columns from the full busco table as blobtools is compatible with an older version of busco that does not generate these columns
+Blob uses the older version of busco so need to run the old one. 
 
-```cut -f1-8 full_table.tsv > full_table_blobtools.tsv```
+```busco -i /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/01_hilli/01_hilli_scaffold.fasta -l diptera_odb10 -o 01_hilli -m genome --out_path ./01_hilli```
 
 Then run blobtools 
 
