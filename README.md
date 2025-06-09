@@ -831,23 +831,24 @@ Blob uses the older version of busco so need to run the old one.
 
 ```busco -i /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/01_hilli/01_hilli_scaffold.fasta -l diptera_odb10 -o 01_hilli -m genome --out_path ./01_hilli```
 
-Then run blobtools 
+Then run blobtools. You need to download the taxdump file from NCBI and put it in the directory with a link to it. 
+
+pip install blobtools
 
 ```
 #!/bin/bash -e
 #SBATCH --account=uow03920
 #SBATCH --job-name=blob
-#SBATCH --time=00:05:00
+#SBATCH --time=01:00:00
 #SBATCH --cpus-per-task=12
-#SBATCH --mem=1G
+#SBATCH --mem=25G
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=paige.matheson14@gmail.com
 #SBATCH --output blob_%j.out
 #SBATCH --error blob_%j.err
 
-pip install Blob
+blobtools create --busco /nesi/nobackup/uow03920/05_blowfly_assembly_march/23_busco_for_blob/01_hilli/01_hilli/run_diptera_odb10/full_table.tsv --fasta /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/01_hilli/01_hilli_scaffold.fasta --cov /nesi/nobackup/uow03920/05_blowfly_assembly_march/20_contamination/01_minimap/01_hilli.bam --hits /nesi/nobackup/uow03920/05_blowfly_assembly_march/20_contamination/01_hilli_megablast.out --replace --taxdump /nesi/nobackup/uow03920/05_blowfly_assembly_march/22_blob/new_taxdump 01_hilli
 
-blobtools create --busco /nesi/nobackup/uow03920/05_blowfly_assembly_march/23_busco_for_blob/01_hilli/01_hilli/run_diptera_odb10/full_table.tsv --fasta /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/01_hilli/01_hilli_scaffold.fasta --cov /nesi/nobackup/uow03920/05_blowfly_assembly_march/20_contamination/01_minimap/01_hilli_sort.bam.csi --hits /nesi/nobackup/uow03920/05_blowfly_assembly_march/20_contamination/01_hilli_megablast.out --replace --taxdump /nesi/nobackup/uow03920/05_blowfly_assembly_march/22_blob/00_taxon 01_hilli
 ```
 
 
