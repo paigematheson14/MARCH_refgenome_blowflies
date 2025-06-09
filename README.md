@@ -826,6 +826,9 @@ done
 
 Blob uses the older version of busco so need to run the old one. 
 
+`ml busco`
+`ml miniprot`
+
 ```busco -i /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/01_hilli/01_hilli_scaffold.fasta -l diptera_odb10 -o 01_hilli -m genome --out_path ./01_hilli```
 
 Then run blobtools 
