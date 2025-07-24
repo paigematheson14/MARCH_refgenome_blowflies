@@ -851,6 +851,9 @@ blobtools create --busco /nesi/nobackup/uow03920/05_blowfly_assembly_march/23_bu
 
 ```
 
+to view these data is ............. boarderline impossible ..... i had the worst time imaginable trying to figure it out lol. It ended up being kinda easy but idk. 
+
+download the blobtoolkit-api and blobtoolkit-viewer from https://github.com/genomehubs/blobtoolkit/releases. Put them in your working directory. Make them executable (```chmod +x blobtoolkit-api blobtoolkit-viewer```). open the viewer (```./blobtoolkit-viewer --dir /path/to/blobtoolkit/dataset```). on a local terminal (not connected to nesi), run ```ssh -L 8080:localhost:8080 nesi```
 
 
 
