@@ -856,8 +856,11 @@ to view these data is ............. boarderline impossible ..... i had the worst
 download the blobtoolkit-api and blobtoolkit-viewer from https://github.com/genomehubs/blobtoolkit/releases. Put them in your working directory. Make them executable (```chmod +x blobtoolkit-api blobtoolkit-viewer```). Use nesi's ondemand virtual desktop. In the virtual desktop, open a terminal and cd to the working directory (with the api and viewer and data needed; `cd /nesi/nobackup/uow03920/05_blowfly_assembly_march/22_blob`). Then add the api to your path: `export=$PATH:$(pwd)`. Then create the viewer `blobtools host --port 8081 --api-port 9001 --hostname localhost /01_hilli`. Then open the link it sends you in the browser within virtual envivronment. 
 
 
+download the taxonomy table to use to filter out contaminants!!!
 
+# filtration of scaffolded genome assembly using meeran's custom script!
 
+This script removes contaminants and filters out contigs that are less than 1000bp in length (script provided at https://github.com/meeranhussain/Genome_assembly_AND_annotation). 
 
 
 
