@@ -987,7 +987,47 @@ then do busco, quast, etc. to check the quality of the assemblies and make sure 
 
 # annotate! 
 
-First - you need to rename the contig IDs because EDTA requires the input FASTA file to have contig IDs that are no longer than 13 characters
+First - you need to rename the contig IDs because EDTA requires the input FASTA file to have contig IDs that are no longer than 13 characters. 
+
+use the following code (make a .sh file)
+
+```
+#!/bin/bash
+
+# contig_name.sh: Rename contigs for strict EDTA compatibility (≤13 chars, no underscores)
+# Usage: ./contig_name.sh input.fasta output.fasta
+
+if [[ $# -ne 2 ]]; then
+  echo "Usage: $0 input.fasta output.fasta"
+  exit 1
+fi
+
+input="$1"
+output="$2"
+mapfile="${output}.contig_map.tsv"
+
+awk -v map="$mapfile" 'BEGIN {
+  i = 0;
+  OFS = "\t";
+  print "Old_ID", "New_ID" > map
+}
+/^>/ {
+  old = substr($0, 2);
+  new = sprintf("contig%05d", ++i);
+  print old, new >> map;
+  print ">" new;
+  next;
+}
+{ print }' "$input" > "$output"
+```
+
+make executable  `chmod +x contig_name.sh`
+
+and run on each assembly by doing 
+
+` ./contig_name.sh ../24_filtered_contamination/01_hilli_filtered_contamination.fasta 01_hilli_final.fasta ```
+
+the first fasta is the one we one to rename contigs for and the second is the new output. this script will also produce a mapping file in case we need to see what the original names of the contigs were. 
 
 
 
