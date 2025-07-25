@@ -860,8 +860,134 @@ download the taxonomy table to use to filter out contaminants!!!
 
 # filtration of scaffolded genome assembly using meeran's custom script!
 
-This script removes contaminants and filters out contigs that are less than 1000bp in length (script provided at https://github.com/meeranhussain/Genome_assembly_AND_annotation). 
+This script removes contaminants and filters out contigs that are less than 1000bp in length (script provided at https://github.com/meeranhussain/Genome_assembly_AND_annotation). I altered the script because i had long read data and meeran's script used qualimap (i used seqkit instead to filter out reads less than 1000bp). 
 
+This is to remove low quality,small and contaminated contigs. It actually didn't really make a huge deal to my assmeblies but did it nevertheless. 
+
+```
+#!/bin/bash
+
+# Function to display usage information
+usage() {
+    echo "Usage: $0 -i <fasta_file> -b <busco_file> -f <blob_file> -o <output_name>"
+    echo
+    echo "Options:"
+    echo "  -i <fasta_file>      Path to the FASTA file"
+    echo "  -b <busco_file>      Path to the BUSCO full_table.tsv file"
+    echo "  -f <blob_file>       Path to the BlobToolKit CSV file"
+    echo "  -o <output_name>     Desired name for the filtered output FASTA"
+    echo "  -h                   Display this help message"
+    exit 1
+}
+
+# Check if seqkit is installed
+if ! command -v seqkit &> /dev/null; then
+    echo "Error: seqkit is not installed. Please install seqkit to proceed."
+    exit 1
+fi
+
+# Check if no arguments were passed and display usage
+if [ $# -eq 0 ]; then
+    usage
+fi
+
+# Read command-line arguments
+while getopts "i:b:f:o:h" flag; do
+    case "${flag}" in
+        i) fasta=${OPTARG};;
+        b) busco_file=${OPTARG};;
+        f) blob_file=${OPTARG};;
+        o) output_name=${OPTARG};;
+        h) usage;;
+        *) usage;;
+    esac
+done
+
+# Check if all required arguments are provided
+if [ -z "${fasta}" ] || [ -z "${busco_file}" ] || [ -z "${blob_file}" ] || [ -z "${output_name}" ]; then
+    echo "Error: Missing required arguments."
+    usage
+fi
+
+############## Logging braces open #####################
+{
+###### Filtering assembly based on contigs size
+
+contigs_siz_fil() {
+    local fasta_file=$1
+
+    # Extract contig names with lengths < 1000bp
+    seqkit fx2tab -n -l "$fasta_file" | awk -F'\t' '$2 < 1000 {print $1}'
+}
+
+######### Filtering assembly based on contaminated contigs
+
+contigs_cont_fil() {
+    local fileA=$1
+    # Extract contaminated contigs
+    awk -F "," 'NR > 1 {
+        gsub(/"/, "", $6);
+        gsub(/"/, "", $7);
+        if ($6 != "Arthropoda" && $6 != "no-hit") {
+            print $7;
+        }
+    }' "$fileA"
+}
+
+echo -e "File $fasta is loaded\n"
+echo -e "File $busco_file is loaded\n"
+echo -e "File $blob_file is loaded\n"
+
+# Call the size filter function
+siz_fil_contigs=$(contigs_siz_fil "$fasta")
+
+# Call the contamination filter function
+cont_fil_contigs=$(contigs_cont_fil "$blob_file")
+
+# Combine both sets of contigs to remove
+echo -e "$siz_fil_contigs\n$cont_fil_contigs" > contigs_rmvd.txt
+
+# SeqKit to filter scaffold
+seqkit grep -v -f contigs_rmvd.txt "$fasta" > "$output_name"
+
+echo -e "Filtered fasta is stored in $output_name\n"
+
+# Report contig counts
+ori_contig_num=$(grep -c "^>" "$fasta")
+fil_contig_num=$(grep -c "^>" "$output_name")
+
+echo -e "Number of contigs\nBefore filtering: $ori_contig_num\nAfter filtering : $fil_contig_num\n"
+
+} 2>&1 | tee -a file.log
+```
+
+run by using the following slurm script: 
+
+```
+#!/bin/bash -e
+#SBATCH --account=uow03920
+#SBATCH --job-name=filter_contaminants
+#SBATCH --time=8:00:00
+#SBATCH --cpus-per-task=12
+#SBATCH --mem=20G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output filter_contaminants_%j.out
+#SBATCH --error filter_contaminants_%j.err
+
+module purge 
+ml SeqKit
+
+for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina; do 
+./filter.sh -i /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/${i}/${i}_scaffold.fasta -b /nesi/nobackup/uow03920/05_blowfly_assembly_march/23_busco_for_blob/${i}/${i}/run_diptera_odb10/full_table.tsv -f ${i}.csv -o ${i}_filtered_contaminants;
+done
+```
+
+then do busco, quast, etc. to check the quality of the assemblies and make sure that they meet the desired assembly standards.... YAY you are done with assemblies, now time to annotate xxxx
+
+# annotate! 
+
+First - you need to rename the contig IDs because EDTA requires the input FASTA file to have contig IDs that are no longer than 13 characters
 
 
 
