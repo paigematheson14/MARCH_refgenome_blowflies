@@ -987,6 +987,8 @@ then do busco, quast, etc. to check the quality of the assemblies and make sure 
 
 # annotate! 
 
+
+## rename the contigs with a sequential naming scheme that adheres to EDTA's requirements
 First - you need to rename the contig IDs because EDTA requires the input FASTA file to have contig IDs that are no longer than 13 characters. 
 
 use the following code (make a .sh file)
@@ -1028,6 +1030,54 @@ and run on each assembly by doing
 ` ./contig_name.sh ../24_filtered_contamination/01_hilli_filtered_contamination.fasta 01_hilli_final.fasta ```
 
 the first fasta is the one we one to rename contigs for and the second is the new output. this script will also produce a mapping file in case we need to see what the original names of the contigs were. 
+
+## identify the repeat regions in the genomes
+
+We want to identify repeat regions in our genomes eg TEs, simple microsatellite repeats, low complexity regions, duplications) so that we can mask them in our downstream gene prediction/annotation analyses. 
+
+with anno --1, we are soft masking, so changing repeat regions to lowercase letters eg ATTAGTGAgtgaatct (i know thats not a true repeat but you get the idea)
+
+its like telling downstream annotation tools "Hey — don’t trust this part. It’s repetitive and not meaningful for gene prediction, alignments, etc."
+
+Basically it improves accuracy of gene annotation, alignments, and evolutionary analysis.
+
+```
+  GNU nano 5.6.1                                                                        repeat_annotation.sl                                                                                  
+#!/bin/bash -e
+#SBATCH --account=uow03920
+#SBATCH --job-name=EDTA_03
+#SBATCH --time=25:00:00
+#SBATCH --cpus-per-task=36
+#SBATCH --mem=50G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output=EDTA_03_%j.out
+#SBATCH --error=EDTA_03_%j.err
+
+# Purge conflicting modules
+module purge
+
+# Load EDTA module
+ml EDTA/2.1.0
+
+# Main loop
+for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina; do
+  echo "Starting EDTA for $i"
+
+  mkdir -p "$i/EDTA"
+  cp "${i}_final.fasta" "$i/EDTA/"
+  cd "$i/EDTA"
+
+  EDTA.pl --genome "${i}_final.fasta" --threads 32 --sensitive 1 --anno 1
+
+  cd ../../  # Return to starting directory
+  echo "Finished EDTA for $i"
+done
+
+```
+
+
+
 
 
 
