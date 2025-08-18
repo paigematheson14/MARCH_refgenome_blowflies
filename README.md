@@ -1171,9 +1171,13 @@ mkdir -p $PREFIX
 export PATH=$PREFIX/bin:$PATH
 ```
 
+have to configure without seccomp and common. it still works without it
+
 ```
-./mconfig --prefix=$PREFIX
+./mconfig --prefix=$HOME/singularity --without-seccomp --without-conmon
 ```
+
+
 
 
 
