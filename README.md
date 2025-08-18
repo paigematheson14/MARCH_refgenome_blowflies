@@ -1130,6 +1130,7 @@ However it won't capture rapidly evolving genes or species specific genes which 
 cat Arthropoda.fasta Uniprot_sprot.fasta > proteins.fasta
 ```
 
+```
 #!/bin/bash -e
 #SBATCH --account=<>
 #SBATCH --job-name=braker_03
@@ -1141,17 +1142,17 @@ cat Arthropoda.fasta Uniprot_sprot.fasta > proteins.fasta
 #SBATCH --output=braker_%j.out
 #SBATCH --error=braker_%j.err
 
-# Clean environment
+#Clean environment
 module purge
 
-# Load Singularity module
+#Load Singularity module
 ml Singularity/3.11.3
 
-# Link the masked genome and protein database
+#Link the masked genome and protein database
 ln -s /nesi/nobackup/<>/PX024_Parasitoid_wasp/05_ncgenome/01_assembly/08_EDTA/Maethio_03/Maethio_03_scfld_fil_mod.fasta.masked ./Maethio_03_masked.fasta
 ln -s ../proteins.fasta
 
-# Run BRAKER3
+#Run BRAKER3
 singularity exec /nesi/project/<>/softwares/braker3.sif braker.pl \
   --threads=12 \
   --genome=Maethio_03_masked.fasta \
@@ -1160,6 +1161,7 @@ singularity exec /nesi/project/<>/softwares/braker3.sif braker.pl \
   --gff3 \
   --AUGUSTUS_ab_initio \
   --crf
+```
 
 p.s. installing Singularity is hard. you have to download the tar from here (https://github.com/sylabs/singularity/releases/tag/v3.11.0). Add it to your directory then untar it (`tar -xvf singularity-ce-3.11.0`). Need to load in module 'Go' (`ml Go') then move into the singularity directory (`cd singularity-ce-3.11.0`). then follow these instructions: 
 
