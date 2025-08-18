@@ -1161,6 +1161,17 @@ singularity exec /nesi/project/<>/softwares/braker3.sif braker.pl \
   --AUGUSTUS_ab_initio \
   --crf
 
+p.s. installing Singularity is hard. you have to download the tar from here (https://github.com/sylabs/singularity/releases/tag/v3.11.0). Add it to your directory then untar it (`tar -xvf singularity-ce-3.11.0`). Need to load in module 'Go' (`ml Go') then move into the singularity directory (`cd singularity-ce-3.11.0`). then follow these instructions: 
+
+```
+export PREFIX=$HOME/singularity
+mkdir -p $PREFIX
+export PATH=$PREFIX/bin:$PATH
+```
+
+```
+./mconfig --prefix=$PREFIX
+```
 
 
 
