@@ -1185,6 +1185,11 @@ make
 make install
 ```
 
+add to path so you only have to wrtie singularity when you want to summon it
+```
+export PATH=$HOME/singularity/bin:$PATH
+```
+
 
 
 
