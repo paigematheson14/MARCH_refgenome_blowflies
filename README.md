@@ -1076,6 +1076,34 @@ done
 
 ```
 
+# repeat masker
+This code masks the repeats that we identified from the above code in a fasta genome assembly
+
+```
+#!/bin/bash -e
+#SBATCH --account=uow03920
+#SBATCH --job-name=Repeatmasker
+#SBATCH --time=48:00:00
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=50G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output=Repeatmasker_%j.out
+#SBATCH --error=Repeatmasker_%j.err
+
+# Purge conflicting modules
+module purge
+
+# Load RepeatMasker
+ml RepeatMasker/4.1.0-gimkl-2020a
+
+# Loop through selected strains and run RepeatMasker
+for i in 01_hilli 03_stygia; do
+    cd ${i}
+    RepeatMasker -pa 32 -xsmall -lib ${i}_final.fasta.mod.EDTA.TElib.fa ${i}_filtered_contaminants.fasta
+    cd ../
+done
+```
 
 
 
