@@ -1077,7 +1077,7 @@ done
 ```
 
 # repeat masker
-This code masks the repeats that we identified from the above code in a fasta genome assembly
+This code masks the repeats that we identified from the above code in a fasta genome assembly. This will avoid the prediction of false positive gene structures in repetitive and low complexitiy regions.
 
 ```
 #!/bin/bash -e
@@ -1105,10 +1105,51 @@ for i in 01_hilli 03_stygia; do
 done
 ```
 
+# gene annotation
+we will annotate genomes on the repeat-masked genome using homology-based evidence from protein databases, leveraging BRAKER3 pipelines.
 
 
+A soft link was created to the masked genome file *_scfld_fil_mod.fasta.masked and renamed as *_masked.fasta within the respective species folder
 
+Protein evidence used for annotation was a concatenated database comprising:
+Uniprot-SwissProt proteins
+OrthoDB Arthropoda proteins
 
+## combine the two proteins into one database
+```
+cat Arthropoda.fasta Uniprot_sprot.fasta > proteins.fasta
+```
+
+#!/bin/bash -e
+#SBATCH --account=<>
+#SBATCH --job-name=braker_03
+#SBATCH --time=20:00:00
+#SBATCH --cpus-per-task=12
+#SBATCH --mem=90G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=
+#SBATCH --output=braker_%j.out
+#SBATCH --error=braker_%j.err
+
+# Clean environment
+module purge
+
+# Load Singularity module
+ml Singularity/3.11.3
+
+# Link the masked genome and protein database
+ln -s /nesi/nobackup/<>/PX024_Parasitoid_wasp/05_ncgenome/01_assembly/08_EDTA/Maethio_03/Maethio_03_scfld_fil_mod.fasta.masked ./Maethio_03_masked.fasta
+ln -s ../proteins.fasta
+
+# Run BRAKER3
+singularity exec /nesi/project/<>/softwares/braker3.sif braker.pl \
+  --threads=12 \
+  --genome=Maethio_03_masked.fasta \
+  --prot_seq=proteins.fasta \
+  --species=Ma_usa_braker1 \
+  --gff3 \
+  --AUGUSTUS_ab_initio \
+  --crf
 
 
 
