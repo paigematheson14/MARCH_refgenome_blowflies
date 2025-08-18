@@ -1177,6 +1177,13 @@ have to configure without seccomp and common. it still works without it
 ./mconfig --prefix=$HOME/singularity --without-seccomp --without-conmon
 ```
 
+then build 
+
+```
+cd /nesi/nobackup/uow03920/05_blowfly_assembly_march/28_annotation/singularity-ce-3.11.0/builddir
+make
+make install
+```
 
 
 
