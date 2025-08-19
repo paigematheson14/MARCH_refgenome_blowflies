@@ -1133,16 +1133,27 @@ cat Arthropoda.fasta Uniprot_sprot.fasta > proteins.fasta
 I struggled a bit trying to download braker3. I tried to download singularity, genemark, millions of Perl dependencies but all I needed to run was `ml Apptainer` then `singularity build braker3.sif docker://teambraker/braker3:latest
 ` lol
 
+have to make sure AUGUSTUS will work since there are some annoying stuff to do with permissions. create a folder for each species and run these code in each of them (i found it easier to run parallel rather than in a loop):
+```
+#Make a directory in your project to hold AUGUSTUS config
+mkdir -p /nesi/nobackup/uow03920/05_blowfly_assembly_march/28_annotation/01_hilli/augustus_config
+
+#module load AUGUSTUS and then add it to the right path so that you have a writeable version in your project folder. 
+ml AUGUSTUS
+cp -r $AUGUSTUS_CONFIG_PATH/* /nesi/nobackup/uow03920/05_blowfly_assembly_march/28_annotation/01_hilli/augustus_config/
+```
+
+nowwwww, you can run the code for the annotation (hopefully)
 
 ```
 #!/bin/bash -e
-#SBATCH --account=<>
+#SBATCH --account=uow03920
 #SBATCH --job-name=braker_03
-#SBATCH --time=20:00:00
+#SBATCH --time=40:00:00
 #SBATCH --cpus-per-task=12
 #SBATCH --mem=90G
 #SBATCH --mail-type=ALL
-#SBATCH --mail-user=
+#SBATCH --mail-user=paige.matheson14@gmail.com
 #SBATCH --output=braker_%j.out
 #SBATCH --error=braker_%j.err
 
@@ -1151,21 +1162,30 @@ module purge
 
 #Load apptainer module
 ml Apptainer
+ml AUGUSTUS
 
-#Link the masked genome and protein database
-ln -s /nesi/nobackup/<>/PX024_Parasitoid_wasp/05_ncgenome/01_assembly/08_EDTA/Maethio_03/Maethio_03_scfld_fil_mod.fasta.masked ./Maethio_03_masked.fasta
-ln -s ../proteins.fasta
+cd /nesi/nobackup/uow03920/05_blowfly_assembly_march/28_annotation/01_hilli
+
+#link in the genome assembly with repetitive regions masked and also the proteins fasta we generated from ortho and busco
+ln -s /nesi/nobackup/uow03920/05_blowfly_assembly_march/27_repeat_masker/01_hilli/01_hilli_filtered_contaminants.fasta.masked ./01_hilli_filtered_contaminants.fasta.masked 
+ln -s /nesi/nobackup/uow03920/05_blowfly_assembly_march/28_annotation/proteins.fasta ./proteins.fasta
 
 #Run BRAKER3
-singularity exec /nesi/nobackup/uow03920/genemark/braker3.sif braker.pl \
-  --threads=12 \
-  --genome=Maethio_03_masked.fasta \
-  --prot_seq=proteins.fasta \
-  --species=Ma_usa_braker1 \
-  --gff3 \
-  --AUGUSTUS_ab_initio \
-  --crf
+apptainer exec \
+  --bind /nesi/nobackup/uow03920/05_blowfly_assembly_march/28_annotation/01_hilli/augustus_config:/opt/Augustus/config \
+  /nesi/nobackup/uow03920/genemark/braker3.sif braker.pl \
+    --threads=12 \
+    --genome=01_hilli_filtered_contaminants.fasta.masked \
+    --prot_seq=proteins.fasta \
+    --species=01_hilli \
+    --gff3 \
+    --AUGUSTUS_ab_initio \
+    --crf
+
+cd ../
 ```
+
+
 
 
 
