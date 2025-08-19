@@ -1163,34 +1163,72 @@ singularity exec /nesi/project/<>/softwares/braker3.sif braker.pl \
   --crf
 ```
 
-p.s. installing Singularity is hard. you have to download the tar from here (https://github.com/sylabs/singularity/releases/tag/v3.11.0). Add it to your directory then untar it (`tar -xvf singularity-ce-3.11.0`). Need to load in module 'Go' (`ml Go') then move into the singularity directory (`cd singularity-ce-3.11.0`). then follow these instructions: 
+# installing braker is HARD
+
+first you need to install GeneMark key and tarbell from here: http://topaz.gatech.edu/GeneMark/license_download.cgi
+
+1. Set up a working directory for genemark: 
 
 ```
-export PREFIX=$HOME/singularity
-mkdir -p $PREFIX
-export PATH=$PREFIX/bin:$PATH
+#Working directory for GeneMark
+mkdir -p $HOME/genemark
+cd $HOME/genemark
+
+#Local Perl library path
+mkdir -p $HOME/perl5
 ```
 
-have to configure without seccomp and common. it still works without it
+2. untar the tarbell and unzip the key
 
 ```
-./mconfig --prefix=$HOME/singularity --without-seccomp --without-conmon
+unzip gm_key_64
+tar -xzf gmes_linux_64.tar.gz
 ```
 
-then build 
+3. set environment variables:
 
 ```
-cd /nesi/nobackup/uow03920/05_blowfly_assembly_march/28_annotation/singularity-ce-3.11.0/builddir
-make
-make install
+export GENEMARK_PATH=$HOME/genemark/gmes_linux_64
+export GENEMARK_PATH=$HOME/genemark/gm_key_64
+export PATH=$GENEMARK_PATH:$PATH
 ```
 
-add to path so you only have to wrtie singularity when you want to summon it
+4. install all the dependencies
+
 ```
-export PATH=$HOME/singularity/bin:$PATH
+cpanm --local-lib=$HOME/perl5 Moo::Role
+cpanm --local-lib=$HOME/perl5 Role::Tiny
+cpanm --local-lib=$HOME/perl5 Class::Method::Modifiers
+cpanm --local-lib=$HOME/perl5 Parallel::ForkManager
+cpanm --local-lib=$HOME/perl5 MCE::Mutex
+cpanm --local-lib=$HOME/perl5 App::cpanminus
+cpanm --local-lib=$HOME/perl5 YAML
+cpanm --local-lib=$HOME/perl5 Hash::Merge
+cpanm --local-lib=$HOME/perl5 Sub::Quote
+cpanm --local-lib=$HOME/perl5 Scalar::Util::Numeric
+cpanm --local-lib=$HOME/perl5 Try::Tiny
+cpanm --local-lib=$HOME/perl5 List::MoreUtils
+cpanm --local-lib=$HOME/perl5 File::Slurp
 ```
 
+5. environmental variables
 
+```
+export GENEMARK_PATH=$HOME/genemark/gmes_linux_64
+export PATH=$GENEMARK_PATH:$HOME/perl5/bin:$PATH
+export PERL5LIB=$HOME/perl5/lib/perl5:$HOME/perl5/lib/perl5/x86_64-linux-thread-multi:$PERL5LIB
+```
+
+6. test
+```
+$GENEMARK_PATH/gmes_petap.pl
+```
+
+Now you can download Braker3?
+
+
+
+`
 
 
 
