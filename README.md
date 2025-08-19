@@ -1130,6 +1130,10 @@ However it won't capture rapidly evolving genes or species specific genes which 
 cat Arthropoda.fasta Uniprot_sprot.fasta > proteins.fasta
 ```
 
+I struggled a bit trying to download braker3. I tried to download singularity, genemark, millions of Perl dependencies but all I needed to run was `ml Apptainer` then `singularity build braker3.sif docker://teambraker/braker3:latest
+` lol
+
+
 ```
 #!/bin/bash -e
 #SBATCH --account=<>
@@ -1145,15 +1149,15 @@ cat Arthropoda.fasta Uniprot_sprot.fasta > proteins.fasta
 #Clean environment
 module purge
 
-#Load Singularity module
-ml Singularity/3.11.3
+#Load apptainer module
+ml Apptainer
 
 #Link the masked genome and protein database
 ln -s /nesi/nobackup/<>/PX024_Parasitoid_wasp/05_ncgenome/01_assembly/08_EDTA/Maethio_03/Maethio_03_scfld_fil_mod.fasta.masked ./Maethio_03_masked.fasta
 ln -s ../proteins.fasta
 
 #Run BRAKER3
-singularity exec /nesi/project/<>/softwares/braker3.sif braker.pl \
+singularity exec /nesi/nobackup/uow03920/genemark/braker3.sif braker.pl \
   --threads=12 \
   --genome=Maethio_03_masked.fasta \
   --prot_seq=proteins.fasta \
@@ -1163,68 +1167,6 @@ singularity exec /nesi/project/<>/softwares/braker3.sif braker.pl \
   --crf
 ```
 
-# installing braker is HARD
-
-first you need to install GeneMark key and tarbell from here: http://topaz.gatech.edu/GeneMark/license_download.cgi
-
-1. Set up a working directory for genemark: 
-
-```
-#Working directory for GeneMark
-mkdir -p $HOME/genemark
-cd $HOME/genemark
-
-#Local Perl library path
-mkdir -p $HOME/perl5
-```
-
-2. untar the tarbell and unzip the key
-
-```
-unzip gm_key_64
-tar -xzf gmes_linux_64.tar.gz
-```
-
-3. set environment variables:
-
-```
-export GENEMARK_PATH=$HOME/genemark/gmes_linux_64
-export GENEMARK_PATH=$HOME/genemark/gm_key_64
-export PATH=$GENEMARK_PATH:$PATH
-```
-
-4. install all the dependencies
-
-```
-cpanm --local-lib=$HOME/perl5 Moo::Role
-cpanm --local-lib=$HOME/perl5 Role::Tiny
-cpanm --local-lib=$HOME/perl5 Class::Method::Modifiers
-cpanm --local-lib=$HOME/perl5 Parallel::ForkManager
-cpanm --local-lib=$HOME/perl5 MCE::Mutex
-cpanm --local-lib=$HOME/perl5 App::cpanminus
-cpanm --local-lib=$HOME/perl5 YAML
-cpanm --local-lib=$HOME/perl5 Hash::Merge
-cpanm --local-lib=$HOME/perl5 Sub::Quote
-cpanm --local-lib=$HOME/perl5 Scalar::Util::Numeric
-cpanm --local-lib=$HOME/perl5 Try::Tiny
-cpanm --local-lib=$HOME/perl5 List::MoreUtils
-cpanm --local-lib=$HOME/perl5 File::Slurp
-```
-
-5. environmental variables
-
-```
-export GENEMARK_PATH=$HOME/genemark/gmes_linux_64
-export PATH=$GENEMARK_PATH:$HOME/perl5/bin:$PATH
-export PERL5LIB=$HOME/perl5/lib/perl5:$HOME/perl5/lib/perl5/x86_64-linux-thread-multi:$PERL5LIB
-```
-
-6. test
-```
-$GENEMARK_PATH/gmes_petap.pl
-```
-
-Now you can download Braker3?
 
 
 
