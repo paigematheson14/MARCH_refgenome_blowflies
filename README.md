@@ -1185,7 +1185,34 @@ apptainer exec \
 cd ../
 ```
 
+# Check the quality of the annotation using busco with the protein function 
 
+```
+#!/bin/bash -e
+#SBATCH --account=uow03920
+#SBATCH --job-name=annotation_qc
+#SBATCH --time=1:00:00
+#SBATCH --cpus-per-task=5
+#SBATCH --mem=10G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output=annotation_qc_%j.out
+#SBATCH --error=annotation_qc_%j.err
+
+# purge all other modules that may be loaded, and might interfare
+module purge
+
+## load tools
+module load compleasm/0.2.5-gimkl-2022a
+
+# Run BUSCO on BRAKER3-predicted protein sequences for each strain
+  compleasm.py protein \
+    -p /nesi/nobackup/uow03920/05_blowfly_assembly_march/28_annotation/01_hilli/braker/braker.aa \
+    -o 01_hilli \
+    -l diptera_odb10 \
+    -t 12
+done
+```
 
 
 
