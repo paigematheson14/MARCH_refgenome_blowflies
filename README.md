@@ -1203,19 +1203,63 @@ cd ../
 module purge
 
 ## load tools
+ml BUSCO
 module load compleasm/0.2.5-gimkl-2022a
 
+LINEAGE=/nesi/nobackup/uow03920/05_blowfly_assembly_march/29_annotation_qc/diptera_odb10
+
 # Run BUSCO on BRAKER3-predicted protein sequences for each strain
-  compleasm.py protein \
-    -p /nesi/nobackup/uow03920/05_blowfly_assembly_march/28_annotation/01_hilli/braker/braker.aa \
-    -o 01_hilli \
-    -l diptera_odb10 \
-    -t 12
-done
+compleasm.py protein -p /nesi/nobackup/uow03920/05_blowfly_assembly_march/28_annotation/01_hilli/braker/braker.aa -o /nesi/nobackup/uow03920/05_blowfly_assembly_march/29_annotation_qc/01_hilli -l $LINEAGE -t 12
 ```
 
+my proteome assemblies had quite a bit of duplications so I ran a bit of extra code to keep only the longest isoforms, and then repeat busco to check that it made duplication go down. 
 
+NOTES (A gene can often produce more than one RNA transcript, which can then be translated into proteins. Each different transcript of the same gene is called an isoform. Why multiple isoforms? Alternative splicing: exons are combined in different ways.Alternative transcription start sites or polyadenylation sites. Effect: Different isoforms can produce proteins with slightly different sequences or functions.). We keep only the longest isoform (i.e. the most complete protein) to avoid redundancy. Then repeat busco to make sure it reduces duplication.
 
+```
+#!/bin/bash -e
+#SBATCH --account=uow03920
+#SBATCH --job-name=busco_clean_proteins
+#SBATCH --time=2:00:00
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=20G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output busco_clean_%j.out
+#SBATCH --error busco_clean_%j.err
+
+module purge
+
+# Load required tools (adjust if different module names exist on NeSI)
+module load AGAT
+module load gffread
+module load compleasm/0.2.5-gimkl-2022a
+
+# ---- Input files ----
+GENOME=/nesi/nobackup/uow03920/05_blowfly_assembly_march/27_repeat_masker/01_hilli/01_hilli_filtered_contaminants.fasta.masked
+GFF=/nesi/nobackup/uow03920/05_blowfly_assembly_march/28_annotation/01_hilli/braker/braker.gff3
+LINEAGE=/nesi/nobackup/uow03920/05_blowfly_assembly_march/29_annotation_qc/diptera_odb10
+OUTDIR=/nesi/nobackup/uow03920/05_blowfly_assembly_march/30_clean_duplicate_proteins/01_hilli
+
+mkdir -p $OUTDIR
+
+# ---- Step 1: Keep only the longest isoform per gene ----
+agat_sp_keep_longest_isoform.pl \
+  --gff $GFF \
+  -o $OUTDIR/annotation_longest.gff3
+
+# ---- Step 2: Extract protein sequences from cleaned GFF ----
+gffread $OUTDIR/annotation_longest.gff3 \
+  -g $GENOME \
+  -y $OUTDIR/annotation_longest.aa
+
+# ---- Step 3: Run BUSCO (protein mode) on the cleaned proteome ----
+compleasm.py protein \
+  -p $OUTDIR/annotation_longest.aa \
+  -o $OUTDIR/busco_protein_longest \
+  -l $LINEAGE \
+  -t 8
+```
 
 `
 
