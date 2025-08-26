@@ -1076,6 +1076,62 @@ done
 
 ```
 
+# quad had a lot of contigs so I had to split it into 20 chunks and then run it parallel to prevent me from having to do like a 14 day slurm job
+
+make a directory for the chunks and use seqkit to split into 20 chunks. this splits per contig so that we still have accurate TE annotation (rather than cutting halfway through a contig).
+
+```module load SeqKit
+
+# Make a folder for splits
+mkdir -p splits
+
+# Split into 20 parts (adjust N based on contig count and runtime)
+seqkit split -p 20 02_quadrimaculata_final.fasta -O splits
+```
+
+then run edta as an array job
+
+```
+#!/bin/bash -e
+#SBATCH --account=uow03920
+#SBATCH --job-name=EDTA_array
+#SBATCH --time=5-00:00:00
+#SBATCH --cpus-per-task=12
+#SBATCH --mem=50G
+#SBATCH --array=0-19
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output=logs/EDTA_%A_%a.out
+#SBATCH --error=logs/EDTA_%A_%a.err
+
+module purge
+ml EDTA/2.1.0
+
+mkdir -p logs results
+
+# Get the split fasta for this array task
+SPLITS=(splits/*.fasta)
+GENOME=${SPLITS[$SLURM_ARRAY_TASK_ID]}
+B=$(basename "$GENOME" .fasta)
+
+echo "Starting EDTA on $GENOME"
+
+mkdir -p results/$B
+cd results/$B
+
+EDTA.pl \
+  --genome "$GENOME" \
+  --threads 12 \
+  --sensitive 1 \
+  --anno 0 \
+  --overwrite 1
+
+cd ../../
+echo "Finished EDTA for $GENOME"
+```
+
+
+
 # repeat masker
 This code masks the repeats that we identified from the above code in a fasta genome assembly. This will avoid the prediction of false positive gene structures in repetitive and low complexitiy regions.
 
