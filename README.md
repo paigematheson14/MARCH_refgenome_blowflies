@@ -1318,6 +1318,41 @@ compleasm.py protein \
 ```
 
 `
+# gene validator
+
+```
+#!/bin/bash -e
+#SBATCH --account=uow03920
+#SBATCH --job-name=genevalidator_hilli
+#SBATCH --time=48:00:00
+#SBATCH --cpus-per-task=20
+#SBATCH --mem=150G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output=genevalidator_%j.out
+#SBATCH --error=genevalidator_%j.err
+
+# Clean environment
+module purge
+
+
+# Load BLAST module (required for homology search)
+ml BLAST/2.16.0-GCC-12.3.0
+
+# Optional: Create BLAST database (do once before running the loop)
+makeblastdb -in ./uniprot_sprot.fasta -dbtype prot -parse_seqids
+
+DB=$(readlink -f ./uniprot_sprot.fasta)
+
+for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina; do
+  /nesi/nobackup/uow03920/05_blowfly_assembly_march/31_genevalidator/genevalidator/bin/genevalidator \
+    -d "$DB" \
+    --num_threads 2 \
+    -m 8 \
+    -o ${i}/02_genevalidator_uni_swissprot \
+    ../30_clean_duplicate_proteins/${i}/annotation_longest.aa
+done
+```
 
 
 
