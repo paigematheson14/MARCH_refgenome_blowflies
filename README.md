@@ -1354,7 +1354,45 @@ for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina; do
 done
 ```
 
+# functional annotation using egg nog
 
+```
+#!/bin/bash -e
+#SBATCH --account=uow03920
+#SBATCH --job-name=eggnog
+#SBATCH --time=48:00:00
+#SBATCH --cpus-per-task=24
+#SBATCH --mem=15G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=
+#SBATCH --output=eggnog_%j.out
+#SBATCH --error=eggnog_%j.err
+
+# Clean environment
+module purge
+
+# Load EggNOG-mapper module
+module load eggnog-mapper/2.1.12-gimkl-2022a
+
+# Loop through ecotypes for functional annotation
+for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina; do
+  mkdir ${i}
+  cd ${i}
+
+  # Optional: Create softlink to protein FASTA file
+ ln -s /nesi/nobackup/uow03920/05_blowfly_assembly_march/30_clean_duplicate_proteins/${i}/annotation_longest.aa ${i}_protein.fa
+
+  # Copy GFF3 file for functional annotation decoration
+  cp /nesi/nobackup/uow03920/05_blowfly_assembly_march/30_clean_duplicate_proteins/${i}/annotation_longest.gff3 ./${i}_braker.gff3
+
+  # Run EggNOG-mapper
+  emapper.py \
+    -i ${i}_protein.fa \
+    -o ${i}_eggnog \
+    --data_dir /nesi/nobackup/uow03920/05_blowfly_assembly_march/34_functional/eggnog_db \
+    --decorate_gff ${i}_braker.gff3 \
+    --cpu 22 \
+```
 
 
 
