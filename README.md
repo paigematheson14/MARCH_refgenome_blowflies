@@ -1424,11 +1424,20 @@ Comparative Genomics Statistics
 
 
 
-1. download musca domestica and D. melangaster sequences from genbank, order the length of the proteins from longest to shortest and select for only the longest
+1. download musca domestica and D. melangaster sequences from genbank, use the primary_transcript.py script that comes with Ortho to get only the longest isoform. actually there is a really good ortho tutorial here: https://davidemms.github.io/orthofinder_tutorials/running-an-example-orthofinder-analysis.html
 
-```
-seqkit sort -l dros_mel.aa | seqkit seq -u -o Drosophila_melangastar.longest.aa
-```
+make sure that you have all of the protein files from BRAKER in fasta format plus the two outgroups in a folder like
+ 01_hilli.aa
+ 02_quad.aa
+ 03_stygia.aa
+ 04_vicina.aa
+ 05_musca.aa
+ 06_melangastar.aa
+
+
+then run ortho on it
+
+ 
 
 
 
