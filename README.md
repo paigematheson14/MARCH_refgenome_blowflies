@@ -1395,6 +1395,48 @@ for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina; do
 ```
 
 
+# COMPARATIVE GENOMICS
+
+because our genomes were scaffolded to a c. vicina genome, we can't really use them to look at genome structure (because itll be biased by being mapped to the c. vicina genome). thus we are mostly going to look at gene family expansion/contraction etc. mostly focussing on detoxification genes, heat shock/cold shock genes, and olfactory genes. 
+
+First we will use orthofinder to identify protein sequences from multiple species and figures out how their genes relate to each other.
+
+🔹 Key Steps Inside OrthoFinder
+
+All-vs-All Sequence Search
+-Compares every protein against every other protein (using DIAMOND/BLAST).
+-Detects which genes are “similar enough” to likely be homologs.
+-Clustering into Orthogroups (Gene Families)
+-Groups genes into “orthogroups,” which are sets of genes descended from a single ancestral gene in the last common ancestor of your species.
+-These orthogroups contain both orthologs (between species) and paralogs (within species).
+
+Multiple Sequence Alignments & Gene Trees
+-For each orthogroup, it builds an alignment and then a phylogenetic tree (FastTree by default, ML if you ask).
+-This tells you how the gene family evolved (duplications, losses, species-specific expansions).
+
+Species Tree Inference
+-Uses single-copy orthologs to build a species tree.
+-This tree is rooted and reconciled with the gene trees.
+
+Comparative Genomics Statistics
+-Summarizes gene family sizes per species.
+-Shows how many genes are single-copy, duplicated, or lost.
+
+
+
+1. download musca domestica and D. melangaster sequences from genbank, order the length of the proteins from longest to shortest and select for only the longest
+
+```
+seqkit sort -l dros_mel.aa | seqkit seq -u -o Drosophila_melangastar.longest.aa
+```
+
+
+
+
+
+
+
+
 
 
 
