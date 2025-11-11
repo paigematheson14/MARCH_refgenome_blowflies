@@ -1475,6 +1475,7 @@ done
 
 Filter short reads using TrimGalore with a Phred score of 20 or below
 
+```
 #!/bin/bash -e
 #SBATCH --account=uow03920
 #SBATCH --job-name=trim_galore
@@ -1499,7 +1500,7 @@ for i in CH CQ CS CV ;
 do
 trim_galore -q 20 --length 100 --paired --fastqc --cores 32 ${i}_R1.fq.gz ${i}_R2.fq.gz -o /nesi/nobackup/uow03920/01_Blowfly_Assembly/05_illumina_data/03_fil_data;
 done
-
+```
 
 
 
