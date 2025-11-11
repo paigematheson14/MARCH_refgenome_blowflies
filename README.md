@@ -1439,11 +1439,39 @@ then run ortho on it
 
  
 
+# I am going to try and scaffold the C. quadrimaculata genome with the old illumina data to see if it improves the genome assembly....
+here is that protocol!!
+
+First - 
+
+You recieve two .fq.gz files per sample. This is because Illumina sequencing technology generates paired-end reads. In paired-end sequencing, DNA fragments are sequenced from both ends, producing two separate reads for each fragment. These reads are usually called "read 1" and "read 2". The first fastq file contains the sequences from the forward read and the second fastq file contains the sequences from the reverse read.
+
+Having reads from both ends of a DNA fragment allows for more accurate alignment to a reference genome or better assembly of a de novo genome. It helps to resolve ambiguities in sequencing, such as repetitive regions, and provides better coverage of the fragment.
 
 
+# first, check the quality of the illumina reads using FASTQ
 
+```
+#!/bin/bash -e
+#SBATCH --account=uow03920
+#SBATCH --job-name=fastqc_illumina
+#SBATCH --time=48:00:00
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=40G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output fastqc_illumina_%j.out    # save the output into a file
+#SBATCH --error fastqc_illumina_%j.err     # save the error output into a file
 
+module purge
+module load FastQC
 
+####FASTQC OF ILLUMINA READS#####
+
+for i in quad; do
+  fastqc -t 8 -o /nesi/nobackup/uow03920/01_Blowfly_Assembly/05_illumina_data/01_Illumina_QC /nesi/nobackup/uow03920/01_Blowfly_Assembly/05_illumina_data/PI_G_${i}.fq.gz
+done
+```
 
 
 
