@@ -1473,6 +1473,33 @@ for i in quad; do
 done
 ```
 
+Filter short reads using TrimGalore with a Phred score of 20 or below
+
+#!/bin/bash -e
+#SBATCH --account=uow03920
+#SBATCH --job-name=trim_galore
+#SBATCH --time=24:00:00
+#SBATCH --cpus-per-task=32
+#SBATCH --mem=40G
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=paige.matheson14@gmail.com
+#SBATCH --output trim_galore_%j.out    # save the output into a file
+#SBATCH --error trim_galore_%j.err     # save the error output into a file
+
+cd /nesi/nobackup/uow03920/01_Blowfly_Assembly/05_illumina_data
+
+# purge all other modules that may be loaded, and might interfare
+module purge
+
+## load tools
+module load TrimGalore/0.6.7-gimkl-2020a-Python-3.8.2-Perl-5.30.1 
+
+### trim_galore
+for i in CH CQ CS CV ;
+do
+trim_galore -q 20 --length 100 --paired --fastqc --cores 32 ${i}_R1.fq.gz ${i}_R2.fq.gz -o /nesi/nobackup/uow03920/01_Blowfly_Assembly/05_illumina_data/03_fil_data;
+done
+
 
 
 
