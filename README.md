@@ -255,6 +255,18 @@ for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina; do
 done
 ```
 
+
+# estimate genome size using Lrge
+
+```
+ git clone https://github.com/mbhall88/lrge.git
+ cd lrge
+ cargo build --release
+ target/release/lrge -h
+```
+lrge fastq.fastq
+
+
 # step 8 : assemble genome ! yay
 
 used a nextflow script: 
