@@ -1181,17 +1181,8 @@ A soft link was created to the masked genome file *_scfld_fil_mod.fasta.masked a
 
 Protein evidence used for annotation was a concatenated database comprising:
 Uniprot-SwissProt proteins
-OrthoDB diptera proteins (i did this using busco which is good becauseit has conserved, single copy genes that are high confidence - `ml BUSCO` then `busco --download diptera_odb10` 
+OrthoDB diptera proteins (https://bioinf.uni-greifswald.de/bioinf/partitioned_odb12/)
 
-## Why it works
-
--Conserved single-copy genes - BUSCO proteins represent orthologous genes conserved across Diptera. This ensures that homologous regions are being annotated in each species, which is exactly what you want for comparative genomics.
-
--Consistency across species - Using the same BUSCO dataset for multiple species means that all genomes are being annotated against the same reference set, making gene content comparisons much cleaner.
-
-Focus on high-confidence genes - Since BUSCO genes are highly conserved and single-copy, they are less likely to be missing or misannotated, which reduces bias in cross-species analyses.
-
-However it won't capture rapidly evolving genes or species specific genes which is why we add in the uniprot data too
 
 ## combine the two proteins into one database
 ```
