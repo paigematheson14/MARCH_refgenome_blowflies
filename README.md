@@ -261,6 +261,7 @@ done
 ```
  git clone https://github.com/mbhall88/lrge.git
  cd lrge
+ml Rust
  cargo build --release
  target/release/lrge -h
 ```
