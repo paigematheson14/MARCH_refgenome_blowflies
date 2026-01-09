@@ -258,6 +258,8 @@ done
 
 # estimate genome size using Lrge
 
+this did not work for my genomes - I kept getting sizes wayyy smaller than I would expect, even after playing around with the parameters
+
 ```
  git clone https://github.com/mbhall88/lrge.git
  cd lrge
@@ -266,6 +268,8 @@ ml Rust
  target/release/lrge -h
 ```
 lrge fastq.fastq
+
+
 
 
 # step 8 : assemble genome ! yay
@@ -1506,6 +1510,40 @@ trim_galore -q 20 --length 100 --paired --fastqc --cores 32 ${i}_R1.fq.gz ${i}_R
 done
 ```
 
+# estimate genome size using coverage 
+
+first get the total number of bases (i.e., sum_length) from the filtered fastq files 
+
+```
+ml SeqKit
+seqkit stats *.fastq
+```
+
+01_hilli had 18,202,362,113 bases
+02_quadrimaculata had 11,190,062,765
+03_stygia had 30,385,561,295 bases 
+04_vicina had 9,975,656,722
+
+Then, map raw reads to our assembly 
+
+```
+minimap2 -t 8 -ax map-ont assembly.fasta ${i}_filtered.fastq | \
+  samtools sort -@ 8 -o ${i}.bam
+```
+
+index
+
+```
+samtools index ${i}.bam
+```
+
+compute per base coverage
+
+```
+samtools depth -a ${i}.bam > ${i}.depth
+```
+
+and calculate genome size as total bases / modal coverage
 
 
 
