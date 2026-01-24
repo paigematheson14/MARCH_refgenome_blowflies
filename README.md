@@ -1187,6 +1187,7 @@ A soft link was created to the masked genome file *_scfld_fil_mod.fasta.masked a
 Protein evidence used for annotation was a concatenated database comprising:
 Uniprot-SwissProt proteins
 OrthoDB diptera proteins (https://bioinf.uni-greifswald.de/bioinf/partitioned_odb12/)
+Busco proeins
 
 
 ## combine the two proteins into one database
@@ -1194,6 +1195,9 @@ OrthoDB diptera proteins (https://bioinf.uni-greifswald.de/bioinf/partitioned_od
 cat Arthropoda.fasta Uniprot_sprot.fasta > proteins.fasta
 ```
 
+
+
+I USED THEBUSCO GENES
 I struggled a bit trying to download braker3. I tried to download singularity, genemark, millions of Perl dependencies but all I needed to run was `ml Apptainer` then `singularity build braker3.sif docker://teambraker/braker3:latest
 ` lol
 
