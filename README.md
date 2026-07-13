@@ -1552,6 +1552,39 @@ and calculate genome size as total bases / modal coverage
 
 
 
+#bash script to remove duplicated isoforms
+```
+#!/bin/bash
+# List of sample IDs
+samples=(07_vicina_hic 08_vicina_longstitch)
+# Loop through each sample
+for sample in "${samples[@]}"
+do
+    echo "Processing $sample..."
+
+    python3 <<EOF
+from Bio import SeqIO
+from collections import defaultdict
+
+input_fasta = "/nesi/nobackup/uow03920/06_blowfly_assembly_jan/11_braker/${sample}/braker/braker.aa"
+output_fasta = "${sample}_longest_isoforms.fa"
+
+# Store longest isoform per gene
+longest = defaultdict(lambda: ("", 0))  # gene_id → (record, length)
+
+for record in SeqIO.parse(input_fasta, "fasta"):
+    gene_id = record.id.split(".")[0]
+    if len(record.seq) > longest[gene_id][1]:
+        longest[gene_id] = (record, len(record.seq))
+
+with open(output_fasta, "w") as out:
+    for rec, _ in longest.values():
+        SeqIO.write(rec, out, "fasta")
+
+print(f"Finished ${sample}")
+EOF
+done
+```
 
 
 
