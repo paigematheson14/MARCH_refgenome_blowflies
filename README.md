@@ -656,12 +656,9 @@ ragtag.py stats ragtag_stygia/ragtag.scaffold.fasta
 ragtag.py stats ragtag_hilli/ragtag.scaffold.fasta
 ```
 
+I didn't end up using ragtag and reference based scaffolding for the reasons described above. I was worried it would affect gene prediction. I used it for C. vicina tho because same species. 
 
-| Parameter   | What it does                                               | Why it's good                                    |
-| ----------- | ---------------------------------------------------------- | ------------------------------------------------ |
-| `-maxmatch` | Align all maximal exact matches (most sensitive mode)      | Captures all syntenic regions, even short ones   |
-| `-c 100`    | Minimum cluster length = 100 bp                            | Reduces noise from short spurious matches        |
-| `-g 1000`   | Max distance between two matches to be in the same cluster | Allows flexibility in aligning regions with gaps |
+I used LongStitch instead, which is a reference free scaffolder and actually improved the genomes more than I thought it would!!!
 
 
 
