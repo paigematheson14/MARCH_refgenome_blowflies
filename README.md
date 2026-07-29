@@ -474,7 +474,7 @@ quast.py -t 16 -o /nesi/nobackup/uow03920/05_blowfly_assembly_march/12_post_purg
 ```
 
 
-# then meeran did the medaka polishing 
+# then meeran did the medaka polishing, see his github for the code :)
 
 # use meryl and merqury to check some other stuff:
 need to download meryl AND merqury (https://github.com/marbl/merqury?tab=readme-ov-file#direct-installation <-- see this page for steps on how to install). Importantly - run this line of code to get it to work lol ```export MERQURY=$PWD``` (i.e., set the environment variable as $merqury). idk man it doesn't work without it. 
@@ -591,20 +591,8 @@ done
 Want to check synteny to see if i can use the high quality C. vicina reference genome to scaffold all my species
 
 If two genomes are syntenic, scaffolding will likely improve contiguity and be accurate.
-If they’re not syntenic (due to inversions, translocations, etc.), reference-guided scaffolding can:
-- Misplace contigs
-- Introduce false joins
-- Create chimeric scaffolds that do not exist in nature
+If they’re not syntenic (due to inversions, translocations, etc.), reference-guided scaffolding can misplace contigs, introduce false joins, and create chimeric scaffolds that do not exist in nature
 
-Synteny analysis (e.g., dot plots) shows:
-
-- Conserved regions (straight diagonals)
-- Inversions (flipped diagonals)
-- Duplications, deletions, or rearrangements (off-diagonal or fragmented patterns)
-
-This lets you:
-- Understand evolutionary divergence between species
-- Avoid blindly trusting scaffolding decisions in divergent regions
 
 Used mumMER
 
