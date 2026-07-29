@@ -661,7 +661,7 @@ I didn't end up using ragtag and reference based scaffolding for the reasons des
 I used LongStitch instead, which is a reference free scaffolder and actually improved the genomes more than I thought it would!!!
 
 
-# QC of all assemblies using QUAST, BUSCO, qualimap, and KAT (prob don't need all these. BUSCO and QUAST most informative imo)
+# QC of all assemblies using QUAST, BUSCO, and KAT 
 
 # busco (do a loop for this if multiple assemblies) 
 ```
@@ -735,46 +735,6 @@ do
 done
 ```
 
-# qualimap 
-
-```
-#!/bin/bash -e
-#SBATCH --account=uow03920
-#SBATCH --job-name=qualimap
-#SBATCH --time=01:00:00
-#SBATCH --mem=20G
-#SBATCH --mail-type=ALL
-#SBATCH --mail-user=paige.matheson14@gmail.com
-#SBATCH --output qualimap%j.out
-#SBATCH --error qualimap%j.err
-
-module purge
-module load BWA/0.7.18-GCC-12.3.0
-
-for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina;
-do
-    # Index the scaffolded genome for alignment
-    bwa index /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/${i}/${i}_scaffold.fasta;
-
-    # Align reads to the scaffolded genome and process BAM file
-    bwa mem -t 24 /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/${i}/${i}_scaffold.fasta \
-    samtools view --threads 16 -F 0x4 -b - | \
-    samtools fixmate -m --threads 16 - - | \
-    samtools sort -m 2g --threads 16 - | \
-    samtools markdup --threads 16 -r - /nesi/nobackup/uow03020/05_blowfly_assembly_march/19_scaffold/00_qualimap/${i};
-
-    # Index the BAM file
-    samtools index -@ 24 /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/00_qualimap/${i}/${i}_sort_sfld.bam -o /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/00_qualimap/${i}/${i}_sort_sfld.bam.bai;
-
-    # Perform Qualimap bamqc on the BAM file
-    /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/00_qualimap/qualimap_v2.3/qualimap bamqc \
-    -bam /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/00_qualimap/${i}/${i}_sort_sfld.bam \
-    -outdir /nesi/nobackup/uow03920/05_blowfly_assembly_march/19_scaffold/00_qualimap \
-    -nt 16 --java-mem-size=8G;
-
-    cd ../;
-done
-```
 
 # BlobToolKit for QC and detecting contamination
 
@@ -859,7 +819,7 @@ download the taxonomy table to use to filter out contaminants!!!
 
 This script removes contaminants and filters out contigs that are less than 1000bp in length (script provided at https://github.com/meeranhussain/Genome_assembly_AND_annotation). I altered the script because i had long read data and meeran's script used qualimap (i used seqkit instead to filter out reads less than 1000bp). 
 
-This is to remove low quality,small and contaminated contigs. It actually didn't really make a huge deal to my assmeblies but did it nevertheless. 
+This is to remove low quality, small and contaminated contigs. It actually didn't really make a huge deal to my assmeblies but good to do anyway.
 
 ```
 #!/bin/bash
@@ -980,11 +940,9 @@ for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina; do
 done
 ```
 
-then do busco, quast, etc. to check the quality of the assemblies and make sure that they meet the desired assembly standards.... YAY you are done with assemblies, now time to annotate xxxx
+then do busco, quast, etc. to check the quality of the assemblies and make sure that they meet the desired assembly standards.... YAY you are done with assemblies, now time to annotate xx
 
 # annotate! 
-
-
 ## rename the contigs with a sequential naming scheme that adheres to EDTA's requirements
 First - you need to rename the contig IDs because EDTA requires the input FASTA file to have contig IDs that are no longer than 13 characters. 
 
@@ -1032,11 +990,8 @@ the first fasta is the one we one to rename contigs for and the second is the ne
 
 We want to identify repeat regions in our genomes eg TEs, simple microsatellite repeats, low complexity regions, duplications) so that we can mask them in our downstream gene prediction/annotation analyses. 
 
-with anno --1, we are soft masking, so changing repeat regions to lowercase letters eg ATTAGTGAgtgaatct (i know thats not a true repeat but you get the idea)
+with anno --1, we are soft masking, so changing repeat regions to lowercase letters. 
 
-its like telling downstream annotation tools "Hey — don’t trust this part. It’s repetitive and not meaningful for gene prediction, alignments, etc."
-
-Basically it improves accuracy of gene annotation, alignments, and evolutionary analysis.
 
 ```
   GNU nano 5.6.1                                                                        repeat_annotation.sl                                                                                  
@@ -1073,61 +1028,6 @@ done
 
 ```
 
-# quad had a lot of contigs so I had to split it into 20 chunks and then run it parallel to prevent me from having to do like a 14 day slurm job
-
-make a directory for the chunks and use seqkit to split into 20 chunks. this splits per contig so that we still have accurate TE annotation (rather than cutting halfway through a contig).
-
-```module load SeqKit
-
-# Make a folder for splits
-mkdir -p splits
-
-# Split into 20 parts (adjust N based on contig count and runtime)
-seqkit split -p 20 02_quadrimaculata_final.fasta -O splits
-```
-
-then run edta as an array job
-
-```
-#!/bin/bash -e
-#SBATCH --account=uow03920
-#SBATCH --job-name=EDTA_array
-#SBATCH --time=5-00:00:00
-#SBATCH --cpus-per-task=12
-#SBATCH --mem=50G
-#SBATCH --array=0-19
-#SBATCH --mail-type=ALL
-#SBATCH --mail-user=paige.matheson14@gmail.com
-#SBATCH --output=logs/EDTA_%A_%a.out
-#SBATCH --error=logs/EDTA_%A_%a.err
-
-module purge
-ml EDTA/2.1.0
-
-mkdir -p logs results
-
-# Get the split fasta for this array task
-SPLITS=(splits/*.fasta)
-GENOME=${SPLITS[$SLURM_ARRAY_TASK_ID]}
-B=$(basename "$GENOME" .fasta)
-
-echo "Starting EDTA on $GENOME"
-
-mkdir -p results/$B
-cd results/$B
-
-EDTA.pl \
-  --genome "$GENOME" \
-  --threads 12 \
-  --sensitive 1 \
-  --anno 0 \
-  --overwrite 1
-
-cd ../../
-echo "Finished EDTA for $GENOME"
-```
-
-
 
 # repeat masker
 This code masks the repeats that we identified from the above code in a fasta genome assembly. This will avoid the prediction of false positive gene structures in repetitive and low complexitiy regions.
@@ -1161,7 +1061,6 @@ done
 # gene annotation
 we will annotate genomes on the repeat-masked genome using homology-based evidence from protein databases, leveraging BRAKER3 pipelines.
 
-
 A soft link was created to the masked genome file *_scfld_fil_mod.fasta.masked and renamed as *_masked.fasta within the respective species folder
 
 Protein evidence used for annotation was a concatenated database comprising:
@@ -1175,9 +1074,6 @@ Busco proeins
 cat Arthropoda.fasta Uniprot_sprot.fasta > proteins.fasta
 ```
 
-
-
-I USED THEBUSCO GENES
 I struggled a bit trying to download braker3. I tried to download singularity, genemark, millions of Perl dependencies but all I needed to run was `ml Apptainer` then `singularity build braker3.sif docker://teambraker/braker3:latest
 ` lol
 
@@ -1385,187 +1281,6 @@ for i in 01_hilli 02_quadrimaculata 03_stygia 04_vicina; do
     --decorate_gff ${i}_braker.gff3 \
     --cpu 22 \
 ```
-
-
-# COMPARATIVE GENOMICS
-
-because our genomes were scaffolded to a c. vicina genome, we can't really use them to look at genome structure (because itll be biased by being mapped to the c. vicina genome). thus we are mostly going to look at gene family expansion/contraction etc. mostly focussing on detoxification genes, heat shock/cold shock genes, and olfactory genes. 
-
-First we will use orthofinder to identify protein sequences from multiple species and figures out how their genes relate to each other.
-
-🔹 Key Steps Inside OrthoFinder
-
-All-vs-All Sequence Search
--Compares every protein against every other protein (using DIAMOND/BLAST).
--Detects which genes are “similar enough” to likely be homologs.
--Clustering into Orthogroups (Gene Families)
--Groups genes into “orthogroups,” which are sets of genes descended from a single ancestral gene in the last common ancestor of your species.
--These orthogroups contain both orthologs (between species) and paralogs (within species).
-
-Multiple Sequence Alignments & Gene Trees
--For each orthogroup, it builds an alignment and then a phylogenetic tree (FastTree by default, ML if you ask).
--This tells you how the gene family evolved (duplications, losses, species-specific expansions).
-
-Species Tree Inference
--Uses single-copy orthologs to build a species tree.
--This tree is rooted and reconciled with the gene trees.
-
-Comparative Genomics Statistics
--Summarizes gene family sizes per species.
--Shows how many genes are single-copy, duplicated, or lost.
-
-
-
-1. download musca domestica and D. melangaster sequences from genbank, use the primary_transcript.py script that comes with Ortho to get only the longest isoform. actually there is a really good ortho tutorial here: https://davidemms.github.io/orthofinder_tutorials/running-an-example-orthofinder-analysis.html
-
-make sure that you have all of the protein files from BRAKER in fasta format plus the two outgroups in a folder like
- 01_hilli.aa
- 02_quad.aa
- 03_stygia.aa
- 04_vicina.aa
- 05_musca.aa
- 06_melangastar.aa
-
-
-then run ortho on it
-
- 
-
-# I am going to try and scaffold the C. quadrimaculata genome with the old illumina data to see if it improves the genome assembly....
-here is that protocol!!
-
-First - 
-
-You recieve two .fq.gz files per sample. This is because Illumina sequencing technology generates paired-end reads. In paired-end sequencing, DNA fragments are sequenced from both ends, producing two separate reads for each fragment. These reads are usually called "read 1" and "read 2". The first fastq file contains the sequences from the forward read and the second fastq file contains the sequences from the reverse read.
-
-Having reads from both ends of a DNA fragment allows for more accurate alignment to a reference genome or better assembly of a de novo genome. It helps to resolve ambiguities in sequencing, such as repetitive regions, and provides better coverage of the fragment.
-
-
-# first, check the quality of the illumina reads using FASTQ
-
-```
-#!/bin/bash -e
-#SBATCH --account=uow03920
-#SBATCH --job-name=fastqc_illumina
-#SBATCH --time=48:00:00
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=40G
-#SBATCH --mail-type=ALL
-#SBATCH --mail-user=paige.matheson14@gmail.com
-#SBATCH --output fastqc_illumina_%j.out    # save the output into a file
-#SBATCH --error fastqc_illumina_%j.err     # save the error output into a file
-
-module purge
-module load FastQC
-
-####FASTQC OF ILLUMINA READS#####
-
-for i in quad; do
-  fastqc -t 8 -o /nesi/nobackup/uow03920/01_Blowfly_Assembly/05_illumina_data/01_Illumina_QC /nesi/nobackup/uow03920/01_Blowfly_Assembly/05_illumina_data/PI_G_${i}.fq.gz
-done
-```
-
-Filter short reads using TrimGalore with a Phred score of 20 or below
-
-```
-#!/bin/bash -e
-#SBATCH --account=uow03920
-#SBATCH --job-name=trim_galore
-#SBATCH --time=24:00:00
-#SBATCH --cpus-per-task=32
-#SBATCH --mem=40G
-#SBATCH --mail-type=ALL
-#SBATCH --mail-user=paige.matheson14@gmail.com
-#SBATCH --output trim_galore_%j.out    # save the output into a file
-#SBATCH --error trim_galore_%j.err     # save the error output into a file
-
-cd /nesi/nobackup/uow03920/01_Blowfly_Assembly/05_illumina_data
-
-# purge all other modules that may be loaded, and might interfare
-module purge
-
-## load tools
-module load TrimGalore/0.6.7-gimkl-2020a-Python-3.8.2-Perl-5.30.1 
-
-### trim_galore
-for i in CH CQ CS CV ;
-do
-trim_galore -q 20 --length 100 --paired --fastqc --cores 32 ${i}_R1.fq.gz ${i}_R2.fq.gz -o /nesi/nobackup/uow03920/01_Blowfly_Assembly/05_illumina_data/03_fil_data;
-done
-```
-
-# estimate genome size using coverage 
-
-first get the total number of bases (i.e., sum_length) from the filtered fastq files 
-
-```
-ml SeqKit
-seqkit stats *.fastq
-```
-
-01_hilli had 18,202,362,113 bases
-02_quadrimaculata had 11,190,062,765
-03_stygia had 30,385,561,295 bases 
-04_vicina had 9,975,656,722
-
-Then, map raw reads to our assembly 
-
-```
-minimap2 -t 8 -ax map-ont assembly.fasta ${i}_filtered.fastq | \
-  samtools sort -@ 8 -o ${i}.bam
-```
-
-index
-
-```
-samtools index ${i}.bam
-```
-
-compute per base coverage
-
-```
-samtools depth -a ${i}.bam > ${i}.depth
-```
-
-and calculate genome size as total bases / modal coverage
-
-
-
-
-#bash script to remove duplicated isoforms
-```
-#!/bin/bash
-# List of sample IDs
-samples=(07_vicina_hic 08_vicina_longstitch)
-# Loop through each sample
-for sample in "${samples[@]}"
-do
-    echo "Processing $sample..."
-
-    python3 <<EOF
-from Bio import SeqIO
-from collections import defaultdict
-
-input_fasta = "/nesi/nobackup/uow03920/06_blowfly_assembly_jan/11_braker/${sample}/braker/braker.aa"
-output_fasta = "${sample}_longest_isoforms.fa"
-
-# Store longest isoform per gene
-longest = defaultdict(lambda: ("", 0))  # gene_id → (record, length)
-
-for record in SeqIO.parse(input_fasta, "fasta"):
-    gene_id = record.id.split(".")[0]
-    if len(record.seq) > longest[gene_id][1]:
-        longest[gene_id] = (record, len(record.seq))
-
-with open(output_fasta, "w") as out:
-    for rec, _ in longest.values():
-        SeqIO.write(rec, out, "fasta")
-
-print(f"Finished ${sample}")
-EOF
-done
-```
-
 
 
 
